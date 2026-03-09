@@ -1,0 +1,48 @@
+import { safeFetch } from './ssrf.js'
+import { fetchViaFlareSolverr } from './flaresolverr.js'
+
+export const USER_AGENT = 'Mozilla/5.0 (compatible; RSSReader/1.0)'
+export const DEFAULT_TIMEOUT = 15_000
+export const DISCOVERY_TIMEOUT = 10_000
+export const PROBE_TIMEOUT = 5_000
+
+export interface FetchHtmlResult {
+  html: string
+  contentType: string
+  usedFlareSolverr: boolean
+}
+
+/**
+ * Fetch HTML from an external URL with safeFetch (SSRF-protected) + FlareSolverr fallback.
+ * For internal URLs (e.g. RSS Bridge), use plain fetch() directly instead.
+ */
+export async function fetchHtml(url: string, opts?: {
+  timeout?: number
+  useFlareSolverr?: boolean
+}): Promise<FetchHtmlResult> {
+  const timeout = opts?.timeout ?? DEFAULT_TIMEOUT
+
+  // Go straight to FlareSolverr if requested
+  if (opts?.useFlareSolverr) {
+    const flare = await fetchViaFlareSolverr(url)
+    if (!flare) throw new Error('FlareSolverr failed')
+    return { html: flare.body, contentType: flare.contentType, usedFlareSolverr: true }
+  }
+
+  const res = await safeFetch(url, {
+    headers: { 'User-Agent': USER_AGENT },
+    signal: AbortSignal.timeout(timeout),
+  })
+
+  if (!res.ok) {
+    const flare = await fetchViaFlareSolverr(url)
+    if (!flare) throw new Error(`HTTP ${res.status}`)
+    return { html: flare.body, contentType: flare.contentType, usedFlareSolverr: true }
+  }
+
+  return {
+    html: await res.text(),
+    contentType: res.headers.get('content-type') || '',
+    usedFlareSolverr: false,
+  }
+}
