@@ -115,27 +115,45 @@ export function SearchDialog({ onClose }: SearchDialogProps) {
   const displayItems = query.trim() ? results : recentArticles
 
   return (
-    <div className="fixed inset-0 bg-overlay z-[70] flex items-end md:items-start justify-center md:pt-[15vh]" onClick={onClose}>
+    <div className="fixed inset-0 bg-bg-card md:bg-overlay z-[70] flex items-start justify-center md:pt-[15vh]" onClick={onClose}>
       <div
-        className="w-full max-w-lg md:rounded-xl rounded-t-xl border border-border shadow-xl overflow-hidden select-none max-h-[85vh] md:max-h-none"
+        className="w-full h-full md:h-auto max-w-lg md:rounded-xl md:border border-border md:shadow-xl overflow-hidden select-none bg-bg-card flex flex-col"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
         onClick={e => e.stopPropagation()}
       >
-        <Command shouldFilter={false}>
-          <div className="relative">
-            <CommandInput
-              value={query}
-              onValueChange={setQuery}
-              placeholder={t('search.placeholder')}
-              autoFocus
-            />
-            {query && (
-              <button
-                onClick={() => { setQuery(''); setResults([]); setHasSearched(false) }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-text transition-colors"
-              >
-                <X size={14} strokeWidth={1.5} />
-              </button>
-            )}
+        <Command
+          shouldFilter={false}
+          className={[
+            'flex flex-col h-full md:h-auto',
+            '[&_[cmdk-input-wrapper]]:border-0 [&_[cmdk-input-wrapper]]:bg-bg-subtle [&_[cmdk-input-wrapper]]:rounded-lg [&_[cmdk-input-wrapper]]:px-3',
+            'md:[&_[cmdk-input-wrapper]]:border-b md:[&_[cmdk-input-wrapper]]:border-border md:[&_[cmdk-input-wrapper]]:bg-transparent md:[&_[cmdk-input-wrapper]]:rounded-none md:[&_[cmdk-input-wrapper]]:px-4',
+          ].join(' ')}
+        >
+          {/* Search header */}
+          <div className="flex items-center gap-2.5 px-3 pt-3 pb-2.5 md:p-0">
+            <div className="relative flex-1 min-w-0">
+              <CommandInput
+                value={query}
+                onValueChange={setQuery}
+                placeholder={t('search.placeholder')}
+                autoFocus
+              />
+              {query && (
+                <button
+                  onClick={() => { setQuery(''); setResults([]); setHasSearched(false) }}
+                  className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-muted hover:text-text transition-colors"
+                >
+                  <X size={14} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-bg-subtle text-muted hover:text-text active:bg-border transition-colors shrink-0"
+              aria-label="Close"
+            >
+              <X size={16} strokeWidth={1.5} />
+            </button>
           </div>
 
           {/* Filter toggles */}
@@ -197,7 +215,7 @@ export function SearchDialog({ onClose }: SearchDialogProps) {
             })}
           </div>
 
-          <CommandList>
+          <CommandList className="flex-1 md:flex-none max-h-none md:max-h-[60vh]">
             {indexBuilding && (
               <CommandEmpty>{t('search.indexBuilding')}</CommandEmpty>
             )}
@@ -224,8 +242,8 @@ export function SearchDialog({ onClose }: SearchDialogProps) {
             )}
           </CommandList>
 
-          {/* Footer hint */}
-          <div className="px-4 py-2 border-t border-border text-[11px] text-muted text-center">
+          {/* Footer hint (desktop only) */}
+          <div className="hidden md:block px-4 py-2 border-t border-border text-[11px] text-muted text-center">
             {t('search.hint')}
           </div>
         </Command>

@@ -379,7 +379,7 @@ export function FeedList({ isOpen, onClose, onBackdropClose, onCollapse, onMarkA
           <SidebarNavItem icon={Inbox} label={t('feeds.inbox')} selected={isInbox && selectedFeedId === null} onClick={() => { void navigate('/inbox'); onClose() }} badge={totalUnread > 0 ? <UnreadBadge count={totalUnread} /> : undefined} />
 
           <SidebarNavItem icon={Search} label={t('search.title')} onClick={() => setSearchOpen(true)} className="group/search">
-            <kbd className="text-[11px] text-muted bg-hover px-1.5 py-1 rounded opacity-0 group-hover/search:opacity-100 transition-opacity inline-flex items-center gap-0"><span className="w-2.5 h-3 inline-flex items-center justify-center"><Command className="w-2.5 h-2.5" /></span><span className="w-3 h-3 inline-flex items-center justify-center leading-none">K</span></kbd>
+            <kbd className="hidden md:inline-flex text-[11px] text-muted bg-hover px-1.5 py-1 rounded opacity-0 group-hover/search:opacity-100 transition-opacity items-center gap-0"><span className="w-2.5 h-3 inline-flex items-center justify-center"><Command className="w-2.5 h-2.5" /></span><span className="w-3 h-3 inline-flex items-center justify-center leading-none">K</span></kbd>
           </SidebarNavItem>
 
           <SidebarNavItem icon={Bookmark} label={t('feeds.bookmarks')} selected={isBookmarks} onClick={() => { void navigate('/bookmarks'); onClose() }} badge={(feedsData?.bookmark_count ?? 0) > 0 ? <UnreadBadge count={feedsData!.bookmark_count} /> : undefined} />
