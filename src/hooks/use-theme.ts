@@ -29,6 +29,23 @@ function syncThemeColorMeta(color: string) {
   metas.forEach(meta => { meta.content = color })
 }
 
+function notifyEmbeddingParent(themeName: string, isDark: boolean) {
+  if (window.parent === window) return
+
+  const referrer = document.referrer
+  if (!referrer) return
+
+  let targetOrigin: string
+  try {
+    targetOrigin = new URL(referrer).origin
+  } catch {
+    return
+  }
+
+  // Notify embedding parents so outer demo chrome can match the active theme.
+  window.parent.postMessage({ type: 'theme-changed', theme: themeName, isDark }, targetOrigin)
+}
+
 function applyTheme(themeName: string, isDark: boolean) {
   const theme = themes.find(t => t.name === themeName) ?? themes[0]
   const colors = resolveColors(isDark ? theme.colors.dark : theme.colors.light)
@@ -45,6 +62,8 @@ function applyTheme(themeName: string, isDark: boolean) {
     localStorage.setItem('theme-bg', bg)
     syncThemeColorMeta(bg)
   }
+
+  notifyEmbeddingParent(theme.name, isDark)
 }
 
 export function useTheme(isDark: boolean) {

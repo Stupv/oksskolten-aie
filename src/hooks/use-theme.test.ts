@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useTheme } from './use-theme'
 import { themes } from '../data/themes'
@@ -64,5 +64,41 @@ describe('useTheme', () => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
     const defaultTheme = themes.find(t => t.name === 'default')!
     expect(meta?.content).toBe(defaultTheme.colors.light['--color-bg'])
+  })
+
+  it('notifies embedding parent when framed', () => {
+    const postMessage = vi.fn()
+    Object.defineProperty(window, 'parent', {
+      configurable: true,
+      value: { postMessage },
+    })
+    Object.defineProperty(document, 'referrer', {
+      configurable: true,
+      value: 'https://oksskolten.com/demo',
+    })
+
+    const { result } = renderHook(() => useTheme(false))
+    act(() => result.current.setTheme('tokyo-night'))
+
+    expect(postMessage).toHaveBeenLastCalledWith(
+      { type: 'theme-changed', theme: 'tokyo-night', isDark: false },
+      'https://oksskolten.com',
+    )
+  })
+
+  it('does not notify parent when not framed', () => {
+    const postMessage = vi.fn()
+    Object.defineProperty(window, 'parent', {
+      configurable: true,
+      value: window,
+    })
+    Object.defineProperty(document, 'referrer', {
+      configurable: true,
+      value: 'https://oksskolten.com/demo',
+    })
+
+    renderHook(() => useTheme(false))
+
+    expect(postMessage).not.toHaveBeenCalled()
   })
 })
