@@ -112,6 +112,7 @@ export function ArticleDetail({ articleUrl }: ArticleDetailProps) {
   )
 
   // Event delegation: single listener on <article> handles all image clicks & errors
+  const hasArticle = !!article
   useEffect(() => {
     const container = articleRef.current
     if (!container) return
@@ -150,7 +151,7 @@ export function ArticleDetail({ articleUrl }: ArticleDetailProps) {
       container.removeEventListener('click', handleClick)
       container.removeEventListener('error', handleError, true)
     }
-  }, [!!article])
+  }, [hasArticle, navigate])
 
   if (error) {
     return (

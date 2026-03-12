@@ -74,8 +74,8 @@ export function FeedList({ isOpen, onClose, onBackdropClose, onCollapse, onMarkA
   const { progress, startFeedFetch, subscribeFeedFetch } = useFetchProgressContext()
   const { data: feedsData, mutate: mutateFeeds } = useSWR<{ feeds: FeedWithCounts[]; bookmark_count: number; like_count: number; clip_feed_id: number | null }>('/api/feeds', fetcher)
   const { data: categoriesData, mutate: mutateCategories } = useSWR<{ categories: Category[] }>('/api/categories', fetcher)
-  const feeds = feedsData?.feeds ?? []
-  const categories = categoriesData?.categories ?? []
+  const feeds = useMemo(() => feedsData?.feeds ?? [], [feedsData])
+  const categories = useMemo(() => categoriesData?.categories ?? [], [categoriesData])
 
   const [feedModalOpen, setFeedModalOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)

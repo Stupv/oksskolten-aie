@@ -62,7 +62,7 @@ export function LoginPage({ onLogin }: { onLogin?: (token: string) => void }) {
       const clean = params.toString()
       window.history.replaceState({}, '', clean ? `/?${clean}` : '/')
     }
-  }, [])
+  }, [t])
 
   if (methods?.setup_required && onLogin) {
     return <SetupPage onLogin={onLogin} />
