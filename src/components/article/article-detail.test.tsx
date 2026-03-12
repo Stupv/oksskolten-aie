@@ -49,7 +49,7 @@ vi.mock('../../hooks/use-summarize', () => ({
   }),
 }))
 
-const mockUseTranslate = vi.fn(() => ({
+const mockUseTranslate = vi.fn((_article?: { id: number; full_text_translated: string | null }, _metrics?: unknown) => ({
   viewMode: 'original' as const,
   setViewMode: vi.fn(),
   translating: false,
@@ -61,7 +61,7 @@ const mockUseTranslate = vi.fn(() => ({
 }))
 
 vi.mock('../../hooks/use-translate', () => ({
-  useTranslate: (...args: unknown[]) => mockUseTranslate(...args),
+  useTranslate: (...args: Parameters<typeof mockUseTranslate>) => mockUseTranslate(...args),
 }))
 
 vi.mock('../ui/ImageLightbox', () => ({
@@ -285,7 +285,7 @@ describe('ArticleDetail stale translation filtering', () => {
 
     // translated_lang='ja' but locale='en' → stale, should pass null
     expect(mockUseTranslate).toHaveBeenCalled()
-    const firstArg = mockUseTranslate.mock.calls[0][0] as { id: number; full_text_translated: string | null }
+    const firstArg = mockUseTranslate.mock.calls[0]![0]
     expect(firstArg).toEqual({ id: 1, full_text_translated: null })
   })
 
@@ -326,7 +326,7 @@ describe('ArticleDetail stale translation filtering', () => {
 
     // translated_lang='ja' and locale='ja' → current, should pass the translation
     expect(mockUseTranslate).toHaveBeenCalled()
-    const firstArg = mockUseTranslate.mock.calls[0][0] as { id: number; full_text_translated: string | null }
+    const firstArg = mockUseTranslate.mock.calls[0]![0]
     expect(firstArg).toEqual({ id: 1, full_text_translated: '日本語訳' })
   })
 
@@ -367,7 +367,7 @@ describe('ArticleDetail stale translation filtering', () => {
 
     // translated_lang=null (legacy) → stale, should pass null
     expect(mockUseTranslate).toHaveBeenCalled()
-    const firstArg = mockUseTranslate.mock.calls[0][0] as { id: number; full_text_translated: string | null }
+    const firstArg = mockUseTranslate.mock.calls[0]![0]
     expect(firstArg).toEqual({ id: 1, full_text_translated: null })
   })
 })
