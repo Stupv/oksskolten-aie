@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useSWR from 'swr'
 import { X, Bookmark, ThumbsUp, Circle, CalendarDays, CalendarRange, CalendarFold } from 'lucide-react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { fetcher } from '../../lib/fetcher'
 import { searchArticles } from '../../lib/search'
 
@@ -50,12 +51,6 @@ export function SearchDialog({ onClose }: SearchDialogProps) {
     fetcher,
   )
   const recentArticles = recentData?.articles ?? []
-
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [])
 
   const doSearch = useCallback(async (q: string, filters: { bookmarked: boolean; liked: boolean; unread: boolean; since?: string }) => {
     abortRef.current?.abort()
@@ -115,12 +110,15 @@ export function SearchDialog({ onClose }: SearchDialogProps) {
   const displayItems = query.trim() ? results : recentArticles
 
   return (
-    <div className="fixed inset-0 bg-bg-card md:bg-overlay z-[70] flex items-start justify-center md:pt-[15vh]" onClick={onClose}>
-      <div
-        className="w-full h-full md:h-auto max-w-lg md:rounded-xl md:border border-border md:shadow-xl overflow-hidden select-none bg-bg-card flex flex-col"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
-        onClick={e => e.stopPropagation()}
-      >
+    <DialogPrimitive.Root open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 bg-bg-card md:bg-overlay z-[70]" />
+        <DialogPrimitive.Content
+          className="fixed inset-0 md:inset-auto md:top-[15vh] md:left-1/2 md:-translate-x-1/2 z-[70] w-full md:max-w-lg md:rounded-xl md:border border-border md:shadow-xl overflow-hidden select-none bg-bg-card flex flex-col"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
+          aria-describedby={undefined}
+        >
+          <DialogPrimitive.Title className="sr-only">Search</DialogPrimitive.Title>
         <Command
           shouldFilter={false}
           className={[
@@ -247,7 +245,8 @@ export function SearchDialog({ onClose }: SearchDialogProps) {
             {t('search.hint')}
           </div>
         </Command>
-      </div>
-    </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
