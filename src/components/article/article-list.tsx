@@ -70,7 +70,6 @@ export const ArticleList = forwardRef<ArticleListHandle, object>(function Articl
   const isGridLayout = layout === 'card' || layout === 'magazine'
   const { t } = useI18n()
   const { progress, startFeedFetch } = useFetchProgressContext()
-  const prevProgressSizeRef = useRef(0)
   const { mutate: globalMutate } = useSWRConfig()
   const getKey = (pageIndex: number, previousPageData: ArticlesResponse | null) => {
     if (previousPageData && !previousPageData.has_more) return null
@@ -91,20 +90,8 @@ export const ArticleList = forwardRef<ArticleListHandle, object>(function Articl
     fetcher,
     {
       revalidateFirstPage: isCollectionView,
-      ...(isCollectionView ? { dedupingInterval: 0 } : undefined),
-      ...(unreadOnly ? { revalidateOnFocus: false, revalidateIfStale: false, revalidateOnReconnect: false } : undefined),
     },
   )
-
-  // Revalidate article list when a feed fetch completes (progress entry removed)
-  useEffect(() => {
-    const prev = prevProgressSizeRef.current
-    const curr = progress.size
-    prevProgressSizeRef.current = curr
-    if (prev > 0 && curr < prev) {
-      void mutate()
-    }
-  }, [progress, mutate])
 
   useImperativeHandle(ref, () => ({
     revalidate: () => mutate(),

@@ -293,6 +293,8 @@ export default function App() {
       fetcher,
       dedupingInterval: 5000,
       revalidateOnFocus: false,
+      revalidateIfStale: false,
+      revalidateOnReconnect: false,
       errorRetryCount: 2,
     }}>
       <BrowserRouter>
