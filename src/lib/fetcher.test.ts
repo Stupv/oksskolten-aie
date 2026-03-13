@@ -78,7 +78,7 @@ describe('fetcher module', () => {
       const data = { items: [1, 2] }
       vi.stubGlobal('fetch', mockFetchResponse(data))
       const result = await fetcher('/api/test')
-      expect(fetch).toHaveBeenCalledWith('/api/test', { headers: { Authorization: 'Bearer test-token' } })
+      expect(fetch).toHaveBeenCalledWith('/api/test', expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }))
       expect(result).toEqual(data)
     })
 
@@ -98,11 +98,11 @@ describe('fetcher module', () => {
     it('sends POST with JSON body', async () => {
       vi.stubGlobal('fetch', mockFetchResponse({ ok: true }))
       await apiPost('/api/items', { name: 'test' })
-      expect(fetch).toHaveBeenCalledWith('/api/items', {
+      expect(fetch).toHaveBeenCalledWith('/api/items', expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-token' },
         body: JSON.stringify({ name: 'test' }),
-      })
+      }))
     })
 
     it('sends empty body when no body provided', async () => {

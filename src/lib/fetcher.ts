@@ -2,8 +2,10 @@ import { authHeaders, handleResponseError, parseSSEStream, ApiError } from './ap
 export { ApiError, authHeaders } from './api-base'
 export type { ChatSSEEvent } from './api-base'
 
+const DEFAULT_TIMEOUT_MS = 30_000
+
 export const fetcher = async (url: string) => {
-  const r = await fetch(url, { headers: authHeaders() })
+  const r = await fetch(url, { headers: authHeaders(), signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS) })
   if (!r.ok) return handleResponseError(r, url)
   return r.json()
 }
@@ -13,6 +15,7 @@ async function request(url: string, method: string, body?: unknown) {
     method,
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: body !== undefined ? JSON.stringify(body) : '{}',
+    signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
   })
   if (!res.ok) return handleResponseError(res, url)
   if (res.status === 204) return undefined
@@ -67,13 +70,14 @@ export async function importOpml(file: File): Promise<{ imported: number; skippe
     method: 'POST',
     headers: authHeaders(),
     body: formData,
+    signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
   })
   if (!res.ok) return handleResponseError(res, '/api/opml')
   return res.json()
 }
 
 export async function fetchOpmlBlob(): Promise<Blob> {
-  const res = await fetch('/api/opml', { headers: authHeaders() })
+  const res = await fetch('/api/opml', { headers: authHeaders(), signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS) })
   if (!res.ok) return handleResponseError(res, '/api/opml')
   return res.blob()
 }
