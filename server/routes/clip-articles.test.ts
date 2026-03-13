@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setupTestDb } from '../__tests__/helpers/testDb.js'
 import { buildApp } from '../__tests__/helpers/buildApp.js'
-import { createFeed, insertArticle, ensureClipFeed, getArticleById, markImagesArchived, upsertSetting } from '../db.js'
+import { createFeed, insertArticle, ensureClipFeed, getArticleById, markImagesArchived, markArticleSeen, upsertSetting } from '../db.js'
 import type { FastifyInstance } from 'fastify'
 import path from 'node:path'
 import os from 'node:os'
@@ -434,5 +434,68 @@ describe('GET /api/articles/images/:filename', () => {
     })
 
     expect(res.statusCode).toBe(404)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// GET /api/articles — smartFloor bypass for clip feeds
+// ---------------------------------------------------------------------------
+
+describe('GET /api/articles smartFloor bypass for clip feeds', () => {
+  function daysAgo(days: number): string {
+    return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+  }
+
+  it('returns old clip articles that smartFloor would normally hide', async () => {
+    const clipFeed = ensureClipFeed()
+
+    // Create articles older than SMART_FLOOR_DAYS (7), all seen
+    for (let i = 0; i < 5; i++) {
+      const id = seedArticle(clipFeed.id, {
+        url: `https://example.com/clip-old-${i}`,
+        published_at: daysAgo(30 + i),
+      })
+      markArticleSeen(id, true)
+    }
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/articles?feed_id=${clipFeed.id}`,
+    })
+
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    // All 5 old articles should be returned (smartFloor not applied)
+    expect(body.articles.length).toBe(5)
+  })
+
+  it('still applies smartFloor to regular (non-clip) feeds', async () => {
+    const feed = seedFeed({ url: 'https://regular.example.com' })
+
+    // 1 recent article + 5 old articles (all seen)
+    const recentId = seedArticle(feed.id, {
+      url: 'https://example.com/regular-recent',
+      published_at: daysAgo(1),
+    })
+    markArticleSeen(recentId, true)
+
+    for (let i = 0; i < 5; i++) {
+      const id = seedArticle(feed.id, {
+        url: `https://example.com/regular-old-${i}`,
+        published_at: daysAgo(30 + i),
+      })
+      markArticleSeen(id, true)
+    }
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/articles?feed_id=${feed.id}`,
+    })
+
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    // smartFloor should hide old articles — only the recent one remains
+    expect(body.articles.length).toBe(1)
+    expect(body.articles[0].url).toBe('https://example.com/regular-recent')
   })
 })

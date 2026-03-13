@@ -212,7 +212,8 @@ export async function articleRoutes(api: FastifyInstance): Promise<void> {
     const read = query.read === '1'
     const sort = query.sort === 'score' ? 'score' as const : undefined
 
-    const smartFloor = !unread && !bookmarked && !liked && !read
+    const isClipFeed = feedId != null && getClipFeed()?.id === feedId
+    const smartFloor = !isClipFeed && !unread && !bookmarked && !liked && !read
     const { articles, total } = getArticles({ feedId, categoryId, unread, bookmarked, liked, read, sort, limit, offset, smartFloor })
     const hasMore = offset + articles.length < total
     reply.send({ articles, total, has_more: hasMore })
