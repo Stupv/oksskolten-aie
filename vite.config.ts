@@ -36,6 +36,18 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
+    build: {
+      chunkSizeWarningLimit: 3000,
+      rollupOptions: {
+        onwarn(warning, defaultHandler) {
+          // Suppress font resolution warnings (tex-gyre-pagella legacy formats)
+          if (warning.message?.includes("didn't resolve at build time")) return
+          // Suppress dynamic/static import mixing warnings
+          if (warning.code === 'MIXED_DYNAMIC_STATIC') return
+          defaultHandler(warning)
+        },
+      },
+    },
     plugins: [
       ...(mode === 'demo' ? [demoAlias({
         [path.join(libDir, 'fetcher.ts')]: path.join(libDir, 'fetcher.demo.ts'),

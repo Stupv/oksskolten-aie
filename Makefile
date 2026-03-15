@@ -34,7 +34,14 @@ lint: ## Run ESLint
 	npm run lint
 
 build-demo: ## Build demo site (catches demo-mode export mismatches)
-	npx vite build --mode demo
+	@npx vite build --mode demo 2>&1 \
+		| grep -v "didn't resolve at build time" \
+		| grep -v '\[plugin vite:reporter\]' \
+		| grep -v 'dynamically imported by' \
+		| grep -v 'dynamic import will not move' \
+		| grep -v '\.woff' \
+		| grep -v '\.woff2' \
+		| grep -v '^\s*$$'
 
 # ---------------------------------------------------------------------------
 # Dev  — project name: oksskolten (default), DB: ./data
