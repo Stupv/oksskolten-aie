@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ActionChip } from '../ui/action-chip'
 import { ChatInlineTrigger } from '../chat/chat-inline'
-import { Bookmark, ThumbsUp, CloudUpload, CloudCheck, Trash2, Languages, SquareM, Sparkles } from 'lucide-react'
+import { Bookmark, ThumbsUp, CloudUpload, CloudCheck, Trash2, Languages, Sparkles } from 'lucide-react'
 import { useI18n } from '../../lib/i18n'
 import type { ArticleDetail } from '../../../shared/types'
 
@@ -110,7 +110,9 @@ export function ArticleToolbar({
       )}
       {article.full_text && (
         <ActionChip onClick={() => navigate(`/${article.url.replace(/^https?:\/\//, '')}.md`)} tooltip={t('article.rawMarkdown')}>
-          <SquareM className="w-3.5 h-3.5" />
+          <svg className="w-5 h-3.5" viewBox="20 25 160 78" fill="currentColor">
+            <path d="M30 98V30h20l20 25 20-25h20v68H90V59L70 84 50 59v39zm125 0l-30-33h20V30h20v35h20z"/>
+          </svg>
         </ActionChip>
       )}
       {article.feed_type === 'clip' && (
