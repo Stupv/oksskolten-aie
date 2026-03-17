@@ -5,3 +5,5 @@
 	vPrefix = true
 	versionFile = package.json
 	changelog = true
+	majorLabels = release/major
+	minorLabels = release/minor
