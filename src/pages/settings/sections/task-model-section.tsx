@@ -58,7 +58,7 @@ export function TaskModelSection({ settings, t }: { settings: Settings; t: TFunc
     anthropicKey.data?.configured, geminiKey.data?.configured, openaiKey.data?.configured,
     googleTranslateKey.data?.configured, deeplKey.data?.configured, claudeCodeReady,
   ])
-  const hasAnyLlmKey = LLM_API_PROVIDERS.some(p => configuredKeys[p])
+  const hasAnyLlmKey = LLM_API_PROVIDERS.some(p => configuredKeys[p]) || claudeCodeReady
   const hasAnyTranslateKey = TRANSLATE_SERVICE_PROVIDERS.some(p => configuredKeys[p])
   const hasAnyKey = hasAnyLlmKey || hasAnyTranslateKey
   const keysLoading = llmKeyStatuses.some(s => !s.data) || translateKeyStatuses.some(s => !s.data)
