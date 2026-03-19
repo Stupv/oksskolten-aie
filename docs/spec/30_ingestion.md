@@ -63,7 +63,7 @@ Cron runs at 5-minute intervals (`*/5 * * * *`) and processes only feeds whose `
    a. If full_text is NULL -> HTML cleaning + Readability + Turndown for full-text retrieval
       - pre-clean -> Readability -> post-clean -> Markdown conversion (see pipeline details below)
       - Extract OGP image (og_image)
-      - Generate 200-character preview (excerpt)
+      - Generate 200-character preview (excerpt) — markdown syntax (images, links) stripped to plain text
    b. If lang is NULL -> Local language detection via CJK character ratio (no API required)
    c. New articles: INSERT INTO articles / Retry: UPDATE articles
    d. New articles: fire-and-forget async similarity detection (see [83_feature_similarity.md](./83_feature_similarity.md))

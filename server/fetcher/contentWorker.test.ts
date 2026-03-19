@@ -124,4 +124,36 @@ describe('parseHtml', () => {
     const result = parseHtml({ html, articleUrl: BASE_URL })
     expect(result.excerpt!.length).toBeLessThanOrEqual(200)
   })
+
+  it('strips markdown image tags from excerpt', () => {
+    const html = makeHtml(`
+      <article>
+        <img src="https://example.com/hero.jpg" alt="hero image">
+        <p>This is the actual article text that should appear in the excerpt.
+        It contains multiple sentences to ensure Readability picks it up properly.</p>
+        <p>Second paragraph with more content for the extraction algorithm.</p>
+        <p>Third paragraph with even more text content to satisfy the length requirement.</p>
+      </article>
+    `)
+
+    const result = parseHtml({ html, articleUrl: BASE_URL })
+    expect(result.excerpt).not.toContain('![')
+    expect(result.excerpt).not.toContain('](')
+    expect(result.excerpt).toContain('actual article text')
+  })
+
+  it('strips markdown link syntax from excerpt but keeps link text', () => {
+    const html = makeHtml(`
+      <article>
+        <p><a href="https://example.com">Click here</a> to read more about this topic.
+        The article continues with enough text for Readability to extract it as main content.</p>
+        <p>Second paragraph with additional content to meet the length threshold.</p>
+        <p>Third paragraph with even more text content.</p>
+      </article>
+    `)
+
+    const result = parseHtml({ html, articleUrl: BASE_URL })
+    expect(result.excerpt).not.toContain('[Click here]')
+    expect(result.excerpt).toContain('Click here')
+  })
 })

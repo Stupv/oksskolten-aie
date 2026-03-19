@@ -142,7 +142,12 @@ export function parseHtml(input: ParseHtmlInput): ParseHtmlResult {
     /\[([^\]]*(?:\n[^\]]*)+)\]\(([^)]+)\)/g,
     (_m, text, url) => `[${text.replace(/\s*\n\s*/g, ' ').trim()}](${url})`,
   )
-  const excerpt = fullText.replace(/\s+/g, ' ').trim().slice(0, 200).trim() || null
+  const excerptText = fullText
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')        // strip ![alt](url)
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')     // [text](url) → text
+    .replace(/\s+/g, ' ')
+    .trim()
+  const excerpt = excerptText.slice(0, 200).trim() || null
 
   const title = article?.title || ogTitle || htmlTitle
   return { fullText, ogImage, excerpt, title }
