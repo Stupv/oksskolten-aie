@@ -2637,4 +2637,33 @@ describe('fetchAllFeeds — retry backoff', () => {
     expect(row.last_error).toBeNull()
     expect(row.retry_count).toBe(2) // Not reset
   })
+
+  it('increments retry_count when processArticle throws', async () => {
+    const feed = seedFeed()
+    insertArticle({
+      feed_id: feed.id,
+      title: 'Throw Me',
+      url: 'https://example.com/throw',
+      published_at: '2024-01-01T00:00:00Z',
+      last_error: 'previous error',
+    })
+
+    const rssXml = rss20Xml('Test', [])
+    // Make fetch throw (not reject with a Response) — this propagates through
+    // fetchArticleContent as lastError in most cases, but the Phase C catch
+    // block also handles the case where processArticle itself throws.
+    mockFetch.mockImplementation((url: string | URL) => {
+      const u = url.toString()
+      if (u === feed.rss_url) return Promise.resolve(mockResponse(rssXml, { headers: { 'content-type': 'application/rss+xml' } }))
+      if (u === 'https://example.com/throw') throw new Error('unexpected crash')
+      return Promise.resolve(mockResponse('', { status: 404 }))
+    })
+
+    await fetchAllFeeds()
+
+    const { getDb } = await import('./db.js')
+    const row = getDb().prepare('SELECT retry_count, last_error FROM articles WHERE url = ?').get('https://example.com/throw') as { retry_count: number; last_error: string | null }
+    expect(row.retry_count).toBe(1)
+    expect(row.last_error).toBeTruthy()
+  })
 })

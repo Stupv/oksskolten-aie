@@ -382,6 +382,13 @@ export async function fetchAllFeeds(
           await processArticle(task)
         } catch (err) {
           log.error('Article error:', err)
+          if (task.kind === 'retry') {
+            const msg = err instanceof Error ? err.message : String(err)
+            updateArticleContent(task.article.id, {
+              last_error: msg,
+              retry_count: (task.article.retry_count ?? 0) + 1,
+            })
+          }
         }
         if (task.kind === 'new') {
           const feedId = task.feed_id
