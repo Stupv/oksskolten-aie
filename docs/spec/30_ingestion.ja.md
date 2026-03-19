@@ -193,7 +193,8 @@ fetchFullText(articleUrl, cleanerConfig?)
 │     table系タグはHTMLのまま保持
 │
 └─ 7. excerpt生成
-      Markdownテキスト先頭200文字を抽出
+      Markdown記法（画像 `![](url)`、リンク `[text](url)` → text）を除去し、
+      プレーンテキスト先頭200文字を抽出
 ```
 
 **フェイルオープン設計**: pre-clean/post-clean は全体を try-catch で囲み、例外時は元HTML/Readability結果をそのまま使用する。クリーナーの障害で記事取り込みが止まらないことを保証する。
