@@ -1,6 +1,6 @@
 # Oksskolten Spec — Keyboard Navigation
 
-> [Back to overview](./01_overview.md)
+> [Back to Overview](./01_overview.md)
 
 ## Keyboard Navigation
 

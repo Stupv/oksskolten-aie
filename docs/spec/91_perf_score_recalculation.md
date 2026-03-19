@@ -1,5 +1,7 @@
 # Oksskolten Spec — Score Recalculation Optimization
 
+> [Back to Overview](./01_overview.md)
+
 ## Background
 
 Oksskolten's engagement score is computed as the product of an engagement value (based on user actions: like/bookmark/read/translate) and a time decay factor.

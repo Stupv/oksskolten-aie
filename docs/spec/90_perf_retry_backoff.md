@@ -1,6 +1,6 @@
 # Oksskolten Spec — Exponential Backoff for Article Retry
 
-> [Back to overview](./01_overview.md)
+> [Back to Overview](./01_overview.md)
 
 ## Background
 
@@ -131,7 +131,7 @@ Phase B retry article processing is modified as follows:
 | `server/db/articles.test.ts` | getRetryArticles / getRetryStats query tests |
 | `server/fetcher.test.ts` | Phase B integration tests |
 | `shared/types.ts` | `retry_count` and `last_retry_at` fields added to `Article` interface |
-| `docs/spec/10_schema.ja.md` / `10_schema.md` | Articles table column documentation |
+| `docs/spec/10_schema.md` | Articles table column documentation |
 
 ### Test Plan
 
