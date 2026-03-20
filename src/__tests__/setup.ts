@@ -1,61 +1,61 @@
-import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
 
 afterEach(() => {
-  cleanup()
-})
+  cleanup();
+});
 
 // Node.js 25+ ships a built-in localStorage that lacks full Web Storage API.
 // Provide a proper in-memory implementation for tests.
-const store = new Map<string, string>()
+const store = new Map<string, string>();
 
 const localStorageMock: Storage = {
   get length() {
-    return store.size
+    return store.size;
   },
   clear() {
-    store.clear()
+    store.clear();
   },
   getItem(key: string) {
-    return store.get(key) ?? null
+    return store.get(key) ?? null;
   },
   key(index: number) {
-    return [...store.keys()][index] ?? null
+    return [...store.keys()][index] ?? null;
   },
   removeItem(key: string) {
-    store.delete(key)
+    store.delete(key);
   },
   setItem(key: string, value: string) {
-    store.set(key, String(value))
+    store.set(key, String(value));
   },
-}
+};
 
-Object.defineProperty(globalThis, 'localStorage', {
+Object.defineProperty(globalThis, "localStorage", {
   value: localStorageMock,
   writable: true,
   configurable: true,
-})
+});
 
 // Radix UI Dialog/AlertDialog needs ResizeObserver and scrollTo in jsdom
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   if (!window.ResizeObserver) {
     window.ResizeObserver = class ResizeObserver {
       observe() {}
       unobserve() {}
       disconnect() {}
-    } as unknown as typeof window.ResizeObserver
+    } as unknown as typeof window.ResizeObserver;
   }
   if (!window.scrollTo) {
-    window.scrollTo = () => {}
+    window.scrollTo = () => {};
   }
   if (!Element.prototype.scrollIntoView) {
-    Element.prototype.scrollIntoView = () => {}
+    Element.prototype.scrollIntoView = () => {};
   }
 }
 
 // window.matchMedia is not implemented in jsdom / happy-dom
-if (typeof window !== 'undefined' && !window.matchMedia) {
-  Object.defineProperty(window, 'matchMedia', {
+if (typeof window !== "undefined" && !window.matchMedia) {
+  Object.defineProperty(window, "matchMedia", {
     writable: true,
     configurable: true,
     value: (query: string) => ({
@@ -68,5 +68,5 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       removeEventListener: () => {},
       dispatchEvent: () => false,
     }),
-  })
+  });
 }

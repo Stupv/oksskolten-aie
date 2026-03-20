@@ -1,7 +1,10 @@
 FROM node:22-slim AS base
 
 ENV TZ=UTC
-RUN apt-get update -qq && apt-get install -y -qq ca-certificates curl tzdata \
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+    ca-certificates=20230311+deb12u1 \
+    curl=7.88.1-10+deb12u14 \
+    tzdata=2025b-0+deb12u2 \
  && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps

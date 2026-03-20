@@ -1,0 +1,413 @@
+{
+  "metadata": {
+    "run_id": "run-002",
+    "project_name": "oksskolten",
+    "project_path": "/projects/external/oksskolten",
+    "started_at": "2026-03-20T11:59:52.917056Z",
+    "completed_at": "2026-03-20T12:10:21.108180Z",
+    "status": "completed",
+    "stages_completed": [],
+    "llm_calls": [
+      {
+        "model": "claude-sonnet-4-6",
+        "stage": "review_robustness",
+        "input_tokens": 4,
+        "output_tokens": 6001,
+        "duration_seconds": 125.73
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "stage": "review_simplicity",
+        "input_tokens": 6,
+        "output_tokens": 8320,
+        "duration_seconds": 134.12
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "stage": "review_security",
+        "input_tokens": 6,
+        "output_tokens": 11077,
+        "duration_seconds": 180.3
+      }
+    ],
+    "total_duration_seconds": 628.191124,
+    "aie_version": "2.0.0",
+    "run_type": "review",
+    "reconciliation_method": "llm"
+  },
+  "metrics_before": null,
+  "understanding": null,
+  "discovery": null,
+  "formulation": null,
+  "execution": null,
+  "metrics_after": null,
+  "validation": null,
+  "review": {
+    "findings": [
+      {
+        "id": "F-001",
+        "severity": "critical",
+        "title": "localStorage access during render throws in restricted browser contexts",
+        "description": "In `create-local-storage-hook.ts`, the `getStored()` function is called synchronously inside `useState(getStored)` during component render. It calls `localStorage.getItem(key)` without any try-catch guard. In Safari Private Browsing, Firefox with `privacy.firstparty.isolate`, or environments where the user has disabled storage access, `localStorage.getItem` throws a `SecurityError`. Because this is called during render (not in an effect), the exception propagates up uncaught and crashes the entire component tree. Every hook built on `createLocalStorageHook` (useAutoMarkRead, useDateMode, useLayout, useTheme, useMascot, etc.) — and by extension virtually every page in the app — is affected. The `useEffect` that writes back also calls `localStorage.setItem` unguarded, compounding the issue. The same unguarded pattern exists in `getAuthToken` and `setAuthToken` in `auth.ts`.",
+        "affected_files": [
+          "src/hooks/create-local-storage-hook.ts",
+          "src/hooks/use-auto-mark-read.ts",
+          "src/hooks/use-date-mode.ts",
+          "src/hooks/use-layout.ts",
+          "src/hooks/use-mascot.ts",
+          "src/lib/auth.ts"
+        ],
+        "affected_symbols": [
+          "createLocalStorageHook",
+          "getStored",
+          "getAuthToken",
+          "setAuthToken"
+        ],
+        "recommendation": "Wrap all localStorage access in try-catch and fall back to the default value. Example: `function getStored(): T { try { const stored = localStorage.getItem(key); if (stored !== null && allowed.has(stored)) return stored as T; } catch { /* storage unavailable */ } return defaultValue; }`. Apply the same pattern to the `setItem` call in the `useEffect`, and to `getAuthToken`/`setAuthToken` in `auth.ts`.",
+        "effort_to_fix": "small",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-002",
+        "severity": "critical",
+        "title": "markSeenOnServer can throw when both network and IndexedDB are unavailable",
+        "description": "In `markSeenWithQueue.ts`, `markSeenOnServer` catches the `apiPost` failure and falls back to `queueSeenIds`. However, `queueSeenIds` (which uses IndexedDB) is awaited without a try-catch. If IndexedDB is also unavailable — private browsing on Safari completely disables it, and some users block it — `queueSeenIds` will throw and the error propagates uncaught from `markSeenOnServer`. All call sites that do not themselves wrap this in a try-catch will surface an unhandled promise rejection. The function signature `Promise<void>` implies callers expect it to be safe to `await` without a catch, but this guarantee is broken.",
+        "affected_files": [
+          "src/lib/markSeenWithQueue.ts",
+          "src/lib/offlineQueue.ts"
+        ],
+        "affected_symbols": [
+          "markSeenOnServer",
+          "queueSeenIds"
+        ],
+        "recommendation": "Add an outer try-catch around the entire function body, or add a nested catch on the `queueSeenIds` call: `try { await queueSeenIds(ids) } catch { /* IndexedDB unavailable, ids lost */ }`. Since article-seen tracking is non-critical, failing silently is preferable to an unhandled rejection.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-003",
+        "severity": "critical",
+        "title": "App bootstrap crashes with no user feedback if root element is missing",
+        "description": "In `main.tsx`, `document.getElementById('root')!` uses a non-null assertion. If the HTML shell is misconfigured (CDN cache serving stale HTML, deployment race conditions, browser extensions removing the element), `getElementById` returns `null` and the `!` assertion makes TypeScript ignore it at compile time, but at runtime `createRoot(null)` throws `TypeError: Cannot read properties of null`. The error is uncaught and the user sees a blank page with no message. The `registerSW` call before it can also fail if the service worker API is unavailable.",
+        "affected_files": [
+          "src/main.tsx"
+        ],
+        "affected_symbols": [],
+        "recommendation": "Guard the mount point: `const rootEl = document.getElementById('root'); if (!rootEl) { document.body.textContent = 'Application failed to load. Please refresh.'; throw new Error('Root element #root not found'); }` Then pass `rootEl` to `createRoot`. This gives a meaningful error in logs and a visible message to the user.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-004",
+        "severity": "warning",
+        "title": "Invalid date strings produce 'Invalid Date' output rather than a safe fallback",
+        "description": "In `dateFormat.ts`, all three exported functions (`formatDate`, `formatRelativeDate`, `formatDetailDate`) guard against `null` and empty strings with `if (!iso) return ''`, but they do not guard against non-empty invalid date strings such as `'undefined'`, `'N/A'`, or malformed ISO values. `new Date('garbage')` produces an `Invalid Date` object; subsequent calls like `d.getFullYear()` return `null`, `d.getTime()` returns `null`, and `toLocaleDateString()` returns `'Invalid Date'` as a string in most browsers. Since these functions are called in article cards and list headers rendered for every article, a single bad `published_at` value from the server propagates as visible UI corruption across the feed.",
+        "affected_files": [
+          "src/lib/dateFormat.ts"
+        ],
+        "affected_symbols": [
+          "formatDate",
+          "formatRelativeDate",
+          "formatDetailDate"
+        ],
+        "recommendation": "After `const d = new Date(iso)`, add a validity check: `if (isNaN(d.getTime())) return ''`. This ensures any unparseable date string is treated the same as a missing date rather than producing a corrupted display string.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-005",
+        "severity": "warning",
+        "title": "Search HTTP errors silently return empty results, masking failures from callers",
+        "description": "In `search.ts`, non-503 non-OK HTTP responses fall through to `return { articles: [], has_more: false }` with no error signal. This means a 401, 500, or network timeout is indistinguishable from a legitimate search that returned zero results. The `SearchDialog` component (and other callers) will render an 'empty state' or 'no results' UI when the search index is actually broken or the user is unauthenticated. This is a misleading user experience and makes diagnosing outages harder. The 503 branch correctly returns `indexBuilding: true`, but all other errors are silently swallowed.",
+        "affected_files": [
+          "src/lib/search.ts"
+        ],
+        "affected_symbols": [
+          "searchArticles"
+        ],
+        "recommendation": "Throw an error (or return a typed `error` field) for non-OK, non-503 responses: `if (!res.ok) throw new Error('Search failed: ' + res.status)`. Callers should catch it and display an error state distinct from the zero-results state.",
+        "effort_to_fix": "small",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-006",
+        "severity": "warning",
+        "title": "useHighlightTheme and useArticleFont apply DOM side-effects with no cleanup on unmount",
+        "description": "`useHighlightTheme` calls `applyLink` (inserting `<link>` tags for CSS) and `useArticleFont` calls `getInitialValue`, both manipulating the DOM as side-effects. If these hooks are torn down and re-mounted (e.g., in React Strict Mode's double-invocation in development, or if the settings panel is unmounted), the `applyLink` function may leave orphaned `<link>` elements or CSS variables in the DOM that are never cleaned up. This can cause style bleed between renders or accumulated DOM nodes. The `use-highlight-theme.ts` has both `getInitialOverride` and `applyLink` as module-level functions invoked in effects — without confirmed cleanup returns, Strict Mode will expose this.",
+        "affected_files": [
+          "src/hooks/use-highlight-theme.ts",
+          "src/hooks/use-article-font.ts"
+        ],
+        "affected_symbols": [
+          "useHighlightTheme",
+          "applyLink",
+          "useArticleFont"
+        ],
+        "recommendation": "Ensure every `useEffect` that inserts `<link>` or `<style>` tags returns a cleanup function that removes the inserted element: `return () => linkEl.remove()`. Similarly, any CSS variable or class applied to `document.documentElement` should be reverted in the cleanup. Audit both hooks for missing effect cleanup returns.",
+        "effort_to_fix": "small",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-007",
+        "severity": "warning",
+        "title": "createLocalStorageHook does not synchronise across browser tabs",
+        "description": "The `createLocalStorageHook` factory returns a hook that reads from localStorage on mount and writes on change via `useEffect`, but it never subscribes to the `storage` window event. If the user has the app open in two tabs and changes a setting in one (e.g., dark mode, layout), the other tab's React state remains stale until it is refreshed. For settings like `auto-mark-read` or `article-open-mode`, stale state in a background tab can cause unexpected behaviour when the user switches to it — e.g., articles not being marked read as expected. The `useDarkMode` hook partially handles this via `subscribeSystemDark`, but that only covers the system media query, not the localStorage-stored preference.",
+        "affected_files": [
+          "src/hooks/create-local-storage-hook.ts"
+        ],
+        "affected_symbols": [
+          "createLocalStorageHook"
+        ],
+        "recommendation": "Add a `storage` event listener in the hook's `useEffect`: `window.addEventListener('storage', handler)` where `handler` checks `e.key === key` and updates state if the new value is valid. Return `() => window.removeEventListener('storage', handler)` from the effect for cleanup.",
+        "effort_to_fix": "small",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-008",
+        "severity": "warning",
+        "title": "12 near-identical localStorage hook wrapper files with zero added logic",
+        "description": "Every single-setting preference (auto-mark-read, date-mode, chat-position, layout, mascot, show-thumbnails, unread-indicator, etc.) follows a three-layer pattern: (1) `createLocalStorageHook` is called to produce an anonymous `useHook`, (2) that hook is immediately re-exported under a named function that does nothing but destructure the tuple into an object. For example, `useAutoMarkRead` is four lines that call `useHook()` and return `{ autoMarkRead, setAutoMarkRead }`. All 12 files are structurally identical, adding ~120 lines of boilerplate with no logic differences whatsoever. The factory `createLocalStorageHook` already encapsulates all the real behaviour; the per-setting wrapper files provide only cosmetic renaming.",
+        "affected_files": [
+          "src/hooks/use-article-open-mode.ts",
+          "src/hooks/use-auto-mark-read.ts",
+          "src/hooks/use-category-unread-only.ts",
+          "src/hooks/use-chat-position.ts",
+          "src/hooks/use-date-mode.ts",
+          "src/hooks/use-internal-links.ts",
+          "src/hooks/use-keyboard-nav-setting.ts",
+          "src/hooks/use-layout.ts",
+          "src/hooks/use-mascot.ts",
+          "src/hooks/use-show-feed-activity.ts",
+          "src/hooks/use-show-thumbnails.ts",
+          "src/hooks/use-unread-indicator.ts",
+          "src/hooks/create-local-storage-hook.ts"
+        ],
+        "affected_symbols": [
+          "createLocalStorageHook",
+          "useAutoMarkRead",
+          "useDateMode",
+          "useCategoryUnreadOnly",
+          "useChatPosition",
+          "useInternalLinks",
+          "useKeyboardNavSetting",
+          "useLayout",
+          "useMascot",
+          "useShowFeedActivity",
+          "useShowThumbnails",
+          "useUnreadIndicator",
+          "useArticleOpenMode"
+        ],
+        "recommendation": "Extend `createLocalStorageHook` to return a named-object hook directly by accepting a `valueName` parameter, e.g. `createLocalStorageHook<AutoMarkRead>('auto-mark-read', 'off', ['on','off'], 'autoMarkRead')` producing `{ autoMarkRead, setAutoMarkRead }`. Each preference then becomes a one-liner export and all 12 wrapper files can be deleted. Their tests can be consolidated into `create-local-storage-hook.test.ts`.",
+        "effort_to_fix": "medium",
+        "source_perspectives": [
+          "simplicity"
+        ]
+      },
+      {
+        "id": "F-009",
+        "severity": "warning",
+        "title": "Duplicate SearchResult interface defined independently in search.ts and search.demo.ts",
+        "description": "Both `src/lib/search.ts` and `src/lib/search.demo.ts` define a local interface `SearchResult` with identical shapes (`id`, `title`, `url`, `feed_name`, `published_at`). Because each file defines its own copy, the two implementations can drift silently — a field change in the real API requires remembering to also update the demo. Neither file exports the type, so consumers cannot reference it directly.",
+        "affected_files": [
+          "src/lib/search.ts",
+          "src/lib/search.demo.ts"
+        ],
+        "affected_symbols": [],
+        "recommendation": "Define `SearchResult` once — either in `shared/types` (already imported elsewhere in the project) or a small `src/lib/search-types.ts` — and import it in both files. Export it so consumers can type their own variables against it.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "simplicity"
+        ]
+      },
+      {
+        "id": "F-010",
+        "severity": "warning",
+        "title": "PlaceholderSection defeats i18n type safety with forced type casts",
+        "description": "In `src/pages/settings/data-tab.tsx`, `PlaceholderSection` accepts `titleKey: string` and `descKey: string`, then calls `t(titleKey as 'settings.data')` and `t(descKey as 'settings.data')` to silence the type checker. This completely bypasses the compile-time guarantee that `t()` only receives valid message keys. A typo in any call site will silently produce a missing-translation fallback at runtime. Casting to the single arbitrary key `'settings.data'` is also semantically misleading.",
+        "affected_files": [
+          "src/pages/settings/data-tab.tsx"
+        ],
+        "affected_symbols": [
+          "PlaceholderSection"
+        ],
+        "recommendation": "Change `titleKey` and `descKey` to the actual i18n key union type that `t()` accepts (whatever `MessageKey` or equivalent the i18n module exports). This eliminates the casts and turns invalid key strings into compile errors.",
+        "effort_to_fix": "small",
+        "source_perspectives": [
+          "simplicity"
+        ]
+      },
+      {
+        "id": "F-011",
+        "severity": "warning",
+        "title": "No rel=noopener noreferrer enforced on sanitized article links — tabnapping risk",
+        "description": "The DOMPurify configuration in `sanitize.ts` adds an `afterSanitizeAttributes` hook only for IMG tags (to inject `loading=lazy`). It never walks anchor tags to enforce `rel=noopener noreferrer` on elements with `target=_blank`. DOMPurify's default allowlist permits both the `target` and `rel` attributes on anchor tags, so malicious article HTML containing `<a href=https://attacker.com target=_blank>` survives sanitization intact. The opened page can set `window.opener.location` to redirect the parent reader tab (tabnapping). While Chromium 88+ applies implicit noopener, Firefox and older browsers remain vulnerable, and server-sourced RSS/article content is an untrusted input that commonly includes `target=_blank` links.",
+        "affected_files": [
+          "src/lib/sanitize.ts"
+        ],
+        "affected_symbols": [
+          "sanitizeHtml"
+        ],
+        "recommendation": "Extend the existing `afterSanitizeAttributes` hook to also cover anchor tags: check if `node.tagName === 'A'` and `node.getAttribute('target') === '_blank'`, then call `node.setAttribute('rel', 'noopener noreferrer')`. This is a one-liner addition to the existing hook and has zero functional impact on legitimate links.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "security"
+        ]
+      },
+      {
+        "id": "F-012",
+        "severity": "warning",
+        "title": "Auth bearer token stored in localStorage — exfiltrable via any XSS",
+        "description": "In `src/lib/auth.ts`, the session token is persisted under the key `auth_token` in localStorage and cached in the module-level variable `_token`. Any successful XSS injection — via article content that escapes sanitization, a compromised npm dependency, or a malicious browser extension — can call `localStorage.getItem('auth_token')` and exfiltrate the token to an attacker-controlled server, resulting in full account takeover with no indication to the user. The token is long-lived and is included in every API request via `authHeaders()` in `api-base.ts`.",
+        "affected_files": [
+          "src/lib/auth.ts",
+          "src/lib/api-base.ts"
+        ],
+        "affected_symbols": [
+          "getAuthToken",
+          "setAuthToken",
+          "logoutClient",
+          "authHeaders"
+        ],
+        "recommendation": "Prefer storing the session credential in an HttpOnly cookie set by the server, which is inaccessible to JavaScript entirely. If a bearer-token SPA flow must be retained, use short-lived tokens with refresh-token rotation and sessionStorage (cleared on tab close) to reduce the persistence window. Pair with a strict server-side Content-Security-Policy to reduce XSS exploitability.",
+        "effort_to_fix": "large",
+        "source_perspectives": [
+          "security"
+        ]
+      },
+      {
+        "id": "F-013",
+        "severity": "warning",
+        "title": "SanitizedHTML component has documentation-only sanitization contract — no type or runtime enforcement",
+        "description": "`src/components/ui/sanitized-html.tsx` renders arbitrary strings via `dangerouslySetInnerHTML` and relies entirely on caller discipline. The component comment says the caller is responsible for sanitizing, but there is no branded type, runtime assertion, or wrapper that enforces this. Any new call site can pass raw server HTML or AI-generated text and silently introduce XSS. The `streamingHtml` value returned by `useStreamingAI` is passed directly to `SanitizedHTML` in `ArticleContentBody`; if `renderMarkdown` output is not passed through `sanitizeHtml` inside `useStreamingAI` itself, this is a live XSS vector in the article summary and translation flows.",
+        "affected_files": [
+          "src/components/ui/sanitized-html.tsx",
+          "src/components/article/article-content-body.tsx",
+          "src/hooks/use-streaming-ai.ts"
+        ],
+        "affected_symbols": [
+          "SanitizedHTML",
+          "ArticleContentBody",
+          "useStreamingAI"
+        ],
+        "recommendation": "Introduce a branded opaque type `SafeHtml` (e.g., `type SafeHtml = string & { __brand: 'SafeHtml' }`) that can only be produced by `sanitizeHtml()`. Change `SanitizedHTML`'s `html` prop to accept `SafeHtml` instead of `string`. This makes the contract compiler-enforced and immediately surfaces any call site that passes raw strings. As a quick interim step, add a DEV-only runtime check inside the component for obvious patterns like `<script` or `javascript:` to catch violations during development.",
+        "effort_to_fix": "small",
+        "source_perspectives": [
+          "security"
+        ]
+      },
+      {
+        "id": "F-014",
+        "severity": "warning",
+        "title": "Streaming AI and translation HTML may render unsanitized intermediate content",
+        "description": "`useStreamingAI` exposes a `streamingHtml` value that is rendered live during streaming via `SanitizedHTML` in `ArticleContentBody` and `ArticleSummarySection`. In `useSummarize`, the final `summaryHtml` is explicitly sanitized (`renderMarkdown` then `sanitizeHtml`), but the in-flight `streamingHtml` is computed inside `useStreamingAI` and the available code shows only markdown processing with no evidence of a `sanitizeHtml` call within the hook. If the streaming path calls `renderMarkdown` without sanitizing, any HTML injected via prompt-injection in article content forwarded to the LLM would execute in the browser before the final sanitized copy replaces it. The same pattern exists in `useTranslate`.",
+        "affected_files": [
+          "src/hooks/use-streaming-ai.ts",
+          "src/hooks/use-summarize.ts",
+          "src/hooks/use-translate.ts",
+          "src/components/article/article-content-body.tsx"
+        ],
+        "affected_symbols": [
+          "useStreamingAI",
+          "useSummarize",
+          "useTranslate",
+          "ArticleContentBody"
+        ],
+        "recommendation": "Ensure `sanitizeHtml()` is called on the output of `renderMarkdown` inside `useStreamingAI` before storing it in `streamingHtml`, applied on every streaming chunk update. DOMPurify is synchronous and fast enough for per-chunk sanitization. Audit `useTranslate` for the same pattern to confirm parity with `useSummarize`.",
+        "effort_to_fix": "small",
+        "source_perspectives": [
+          "security"
+        ]
+      },
+      {
+        "id": "F-015",
+        "severity": "info",
+        "title": "Service worker update toast uses null duration with no dismiss safeguard",
+        "description": "In `main.tsx`, the `onNeedRefresh` callback creates a toast with `duration: null`. If the `updateSW(true)` action callback throws or the service worker update fails, the toast remains permanently visible with no way to dismiss it (the only action is 'Reload'). Additionally, if `onNeedRefresh` fires multiple times (e.g., due to repeated SW registration), multiple permanent toasts stack up. The toast library (Sonner) does not deduplicate by default.",
+        "affected_files": [
+          "src/main.tsx"
+        ],
+        "affected_symbols": [],
+        "recommendation": "Assign a stable `id` to the toast (e.g., `id: 'sw-update'`) so Sonner deduplicates repeated calls. Wrap the `onClick` handler to catch errors from `updateSW(true)` and dismiss the toast on failure with an appropriate message: `onClick: async () => { try { await updateSW(true) } catch { toast.dismiss('sw-update'); toast.error('Update failed — please refresh manually.') } }`.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "robustness"
+        ]
+      },
+      {
+        "id": "F-016",
+        "severity": "info",
+        "title": "handleSummarize is a redundant useCallback wrapper around run",
+        "description": "In `src/hooks/use-summarize.ts`, `const handleSummarize = useCallback(() => run(), [run])` creates a memoized function whose sole body is calling `run()`. If `run` is already a stable reference from `useStreamingAI`, `handleSummarize` is behaviourally identical to `run` and the wrapper adds a hook call plus an extra closure allocation for no benefit. If `run` is unstable, `handleSummarize` will also be unstable (it lists `run` as a dependency), so memoisation still provides nothing.",
+        "affected_files": [
+          "src/hooks/use-summarize.ts"
+        ],
+        "affected_symbols": [
+          "useSummarize"
+        ],
+        "recommendation": "Remove the `useCallback` wrapper and expose `run` directly as `handleSummarize` via destructuring rename: `const { ..., run: handleSummarize } = useStreamingAI(...)`. This removes an unnecessary hook call and a needless intermediate closure.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "simplicity"
+        ]
+      },
+      {
+        "id": "F-017",
+        "severity": "info",
+        "title": "getStored named helper in createLocalStorageHook is an unnecessary intermediate",
+        "description": "Inside `createLocalStorageHook`, the named inner function `getStored()` exists solely to be passed as the lazy initialiser to `useState(getStored)`. Its two-line body is not reused anywhere else. Naming it creates an extra identifier to track without adding clarity; an inline initialiser arrow would be equally readable and reduce one level of indirection.",
+        "affected_files": [
+          "src/hooks/create-local-storage-hook.ts"
+        ],
+        "affected_symbols": [
+          "createLocalStorageHook",
+          "getStored"
+        ],
+        "recommendation": "Inline the logic directly into `useState`: `useState(() => { const stored = localStorage.getItem(key); return (stored !== null && allowed.has(stored)) ? (stored as T) : defaultValue })`. Remove the separate `getStored` function declaration. Note: this should be done in conjunction with the try-catch fix (F-001) so both improvements are applied together.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "simplicity"
+        ]
+      },
+      {
+        "id": "F-018",
+        "severity": "info",
+        "title": "API tokens copied to clipboard without expiry timeout or user warning",
+        "description": "In `ApiTokenSettings.handleCopy` and `GitHubOAuthSettings.handleCopy`, sensitive API tokens and OAuth secrets are copied to the system clipboard. Clipboard contents persist across application focus changes and are accessible to background clipboard managers, browser extensions, and other browser tabs that have clipboard permission. There is no timeout that clears the clipboard after a short interval, and no visible warning informing the user that a secret is now in their clipboard.",
+        "affected_files": [
+          "src/components/settings/api-token-settings.tsx",
+          "src/components/settings/github-oauth-settings.tsx"
+        ],
+        "affected_symbols": [
+          "ApiTokenSettings",
+          "GitHubOAuthSettings"
+        ],
+        "recommendation": "After copying, schedule a `setTimeout` of approximately 30 seconds to overwrite the clipboard with an empty string via `navigator.clipboard.writeText('')`. Display a UI hint such as 'Token copied — will clear from clipboard in 30s' so the user is aware of the exposure window. This aligns with OWASP clipboard handling guidance.",
+        "effort_to_fix": "trivial",
+        "source_perspectives": [
+          "security"
+        ]
+      }
+    ],
+    "summary": "Three independent review perspectives — robustness, simplicity, and security — identified 18 distinct findings across the oksskolten codebase. The most critical issues are three robustness failures: unguarded `localStorage` access during render (crashing the entire app in Safari Private Browsing and similar contexts), an unhandled rejection in the `markSeenOnServer` offline-queue fallback path, and a non-null assertion on the React root element that produces a blank page with no user feedback on misconfigured deploys. Security findings of note include unsanitized intermediate HTML rendered during AI streaming (potential XSS via prompt injection), the absence of `rel=noopener noreferrer` enforcement on anchor tags in sanitized article content (tabnapping), and an unenforceable documentation-only contract on `SanitizedHTML` that any future call site can silently violate. The dominant simplicity problem is 120 lines of structural boilerplate across 12 near-identical localStorage hook wrapper files that could be eliminated by extending the factory. Several of these findings compound one another: the localStorage crash risk (F-001) and the simplicity refactor of the wrapper files (F-008) both target `create-local-storage-hook.ts`, making them natural to address together, and the `getStored` inlining suggestion (F-017) should be deferred until the try-catch fix (F-001) is applied first.",
+    "perspective_summaries": {
+      "robustness": "The robustness perspective identified 8 findings centred on silent failure modes and missing defensive guards. Three critical issues stand out: unguarded synchronous localStorage access during render crashes the entire component tree in storage-restricted browsers; the markSeenOnServer fallback to IndexedDB can throw an unhandled rejection when both network and IndexedDB are unavailable; and a non-null assertion on the React mount point produces a blank page with no user feedback. Warning-level findings include invalid date strings producing corrupted UI output, search HTTP errors being silently swallowed as empty results, missing useEffect cleanup in DOM-manipulating hooks, and no cross-tab synchronisation for localStorage-backed settings. A minor info finding covers the service worker update toast lacking deduplication and error handling.",
+      "simplicity": "The simplicity perspective identified 5 findings dominated by structural redundancy. The most impactful is 12 near-identical localStorage hook wrapper files totalling ~120 lines of boilerplate with zero added logic — all 12 could be eliminated by extending the createLocalStorageHook factory to accept a value name parameter. Secondary findings include a duplicate SearchResult interface defined independently in search.ts and search.demo.ts (silent drift risk), and PlaceholderSection defeating i18n type safety via forced casts to an arbitrary key. Two info-level findings cover a no-op useCallback wrapper in useSummarize and an unnecessary named intermediate function in the localStorage hook factory.",
+      "security": "The security perspective identified 5 findings across XSS, token storage, and tabnapping vectors. The overall DOMPurify + SanitizedHTML sanitization architecture is sound, but four gaps weaken it: anchor tags with target=_blank are not forced to rel=noopener noreferrer, enabling tabnapping in Firefox and older browsers; the SanitizedHTML component's safety contract is documentation-only with no branded type enforcement, making future call-site violations invisible at compile time; streaming AI/translation HTML may be rendered via renderMarkdown without a sanitizeHtml pass, opening a prompt-injection XSS window during the streaming phase. The auth bearer token in localStorage is exfiltrable by any XSS and is the highest-effort fix (requires moving to HttpOnly cookies). A minor info finding covers API tokens copied to clipboard without a clearing timeout."
+    }
+  },
+  "scope": null
+}

@@ -1,22 +1,31 @@
-import { Construction } from 'lucide-react'
-import { useI18n } from '../../lib/i18n'
-import { DataSection } from './sections/data-section'
-import { Separator } from '@/components/ui/separator'
+import { Construction } from "lucide-react";
+import { useI18n } from "../../lib/i18n";
+import { DataSection } from "./sections/data-section";
+import { StorageStatsCard } from "@/components/settings/storage-stats-card";
+import { Separator } from "@/components/ui/separator";
 
-function PlaceholderSection({ titleKey, descKey }: { titleKey: string; descKey: string }) {
-  const { t } = useI18n()
+function PlaceholderSection({
+  titleKey,
+  descKey,
+}: {
+  titleKey: string;
+  descKey: string;
+}) {
+  const { t } = useI18n();
   return (
     <section className="opacity-50">
       <div className="flex items-center gap-2 mb-1">
-        <h2 className="text-base font-semibold text-text">{t(titleKey as 'settings.data')}</h2>
+        <h2 className="text-base font-semibold text-text">
+          {t(titleKey as "settings.data")}
+        </h2>
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-muted bg-hover select-none">
           <Construction size={10} />
-          {t('settings.comingSoon')}
+          {t("settings.comingSoon")}
         </span>
       </div>
-      <p className="text-xs text-muted">{t(descKey as 'settings.data')}</p>
+      <p className="text-xs text-muted">{t(descKey as "settings.data")}</p>
     </section>
-  )
+  );
 }
 
 export function DataTab() {
@@ -24,9 +33,17 @@ export function DataTab() {
     <>
       <DataSection />
       <Separator />
-      <PlaceholderSection titleKey="settings.dbBackup" descKey="settings.dbBackupDesc" />
+      <StorageStatsCard />
       <Separator />
-      <PlaceholderSection titleKey="settings.articlePurge" descKey="settings.articlePurgeDesc" />
+      <PlaceholderSection
+        titleKey="settings.dbBackup"
+        descKey="settings.dbBackupDesc"
+      />
+      <Separator />
+      <PlaceholderSection
+        titleKey="settings.articlePurge"
+        descKey="settings.articlePurgeDesc"
+      />
     </>
-  )
+  );
 }

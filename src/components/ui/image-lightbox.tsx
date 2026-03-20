@@ -1,14 +1,14 @@
-import { useEscapeKey } from '../../hooks/use-escape-key'
+import { useEscapeKey } from "../../hooks/use-escape-key";
 
 interface ImageLightboxProps {
-  src: string | null
-  onClose: () => void
+  src: string | null;
+  onClose: () => void;
 }
 
 export function ImageLightbox({ src, onClose }: ImageLightboxProps) {
-  useEscapeKey(onClose)
+  useEscapeKey(onClose);
 
-  if (!src) return null
+  if (!src) return null;
 
   return (
     <div
@@ -22,5 +22,5 @@ export function ImageLightbox({ src, onClose }: ImageLightboxProps) {
         alt=""
       />
     </div>
-  )
+  );
 }

@@ -1,94 +1,110 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
 interface UseKeyboardNavigationOptions {
-  items: string[]
-  focusedItemId: string | null
-  onFocusChange: (id: string) => void
-  onEnter?: (id: string) => void
-  onEscape?: () => void
-  onBookmarkToggle?: (id: string) => void
-  onOpenExternal?: (id: string) => void
-  enabled: boolean
+  items: string[];
+  focusedItemId: string | null;
+  onFocusChange: (id: string) => void;
+  onEnter?: (id: string) => void;
+  onEscape?: () => void;
+  onBookmarkToggle?: (id: string) => void;
+  onOpenExternal?: (id: string) => void;
+  enabled: boolean;
 }
 
 export function useKeyboardNavigation(options: UseKeyboardNavigationOptions) {
   // Keep latest options in a ref so the event listener always sees current values
   // without needing to re-attach on every render.
-  const optionsRef = useRef(options)
-  optionsRef.current = options
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   useEffect(() => {
-    if (!options.enabled) return
+    if (!options.enabled) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      const { items, focusedItemId, onFocusChange, onEnter, onEscape, onBookmarkToggle, onOpenExternal } = optionsRef.current
+      const {
+        items,
+        focusedItemId,
+        onFocusChange,
+        onEnter,
+        onEscape,
+        onBookmarkToggle,
+        onOpenExternal,
+      } = optionsRef.current;
 
-      const target = e.target as HTMLElement
+      const target = e.target as HTMLElement;
       const isInput =
-        ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) ||
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
         target.isContentEditable ||
-        (typeof target.getAttribute === 'function' && target.getAttribute('contenteditable') === 'true')
+        (typeof target.getAttribute === "function" &&
+          target.getAttribute("contenteditable") === "true");
 
-      if (isInput) return
+      if (isInput) return;
 
       // Check for open dialogs/modals (skip article overlay which allows j/k)
-      const openDialog = document.querySelector('[role="dialog"][data-state="open"]:not([data-keyboard-nav-passthrough])')
-      if (openDialog) return
+      const openDialog = document.querySelector(
+        '[role="dialog"][data-state="open"]:not([data-keyboard-nav-passthrough])',
+      );
+      if (openDialog) return;
 
-      const { key } = e
+      const { key } = e;
 
-      if (key === 'j' || key === 'k') {
-        if (items.length === 0) return
+      if (key === "j" || key === "k") {
+        if (items.length === 0) return;
 
         if (focusedItemId === null) {
-          onFocusChange(items[0])
-          return
+          onFocusChange(items[0]);
+          return;
         }
 
-        const currentIndex = items.indexOf(focusedItemId)
+        const currentIndex = items.indexOf(focusedItemId);
         if (currentIndex === -1) {
-          onFocusChange(items[0])
-          return
+          onFocusChange(items[0]);
+          return;
         }
 
-        if (key === 'j') {
-          const nextIndex = currentIndex + 1
+        if (key === "j") {
+          const nextIndex = currentIndex + 1;
           if (nextIndex < items.length) {
-            onFocusChange(items[nextIndex])
+            onFocusChange(items[nextIndex]);
           }
         } else {
-          const prevIndex = currentIndex - 1
+          const prevIndex = currentIndex - 1;
           if (prevIndex >= 0) {
-            onFocusChange(items[prevIndex])
+            onFocusChange(items[prevIndex]);
           }
         }
-        return
+        return;
       }
 
-      if (key === 'Enter' && focusedItemId && onEnter) {
-        onEnter(focusedItemId)
-        return
+      if (key === "Enter" && focusedItemId && onEnter) {
+        onEnter(focusedItemId);
+        return;
       }
 
-      if (key === 'Escape' && onEscape) {
+      if (key === "Escape" && onEscape) {
         // If a passthrough dialog (e.g. article overlay) is open, let it handle Escape
-        if (document.querySelector('[data-keyboard-nav-passthrough][data-state="open"]')) return
-        onEscape()
-        return
+        if (
+          document.querySelector(
+            '[data-keyboard-nav-passthrough][data-state="open"]',
+          )
+        )
+          return;
+        onEscape();
+        return;
       }
 
-      if (key === 'b' && focusedItemId && onBookmarkToggle) {
-        onBookmarkToggle(focusedItemId)
-        return
+      if (key === "b" && focusedItemId && onBookmarkToggle) {
+        onBookmarkToggle(focusedItemId);
+        return;
       }
 
-      if (key === ';' && focusedItemId && onOpenExternal) {
-        onOpenExternal(focusedItemId)
-        return
+      if (key === ";" && focusedItemId && onOpenExternal) {
+        onOpenExternal(focusedItemId);
+        return;
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [options.enabled])
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [options.enabled]);
 }

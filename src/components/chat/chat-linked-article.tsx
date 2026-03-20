@@ -1,14 +1,18 @@
-import { Link } from 'react-router-dom'
-import { articleUrlToPath, extractDomain } from '../../lib/url'
+import { Link } from "react-router-dom";
+import { articleUrlToPath, extractDomain } from "../../lib/url";
 
 interface ChatLinkedArticleProps {
-  title: string
-  url: string
-  ogImage: string | null
+  title: string;
+  url: string;
+  ogImage: string | null;
 }
 
-export function ChatLinkedArticle({ title, url, ogImage }: ChatLinkedArticleProps) {
-  const domain = extractDomain(url)
+export function ChatLinkedArticle({
+  title,
+  url,
+  ogImage,
+}: ChatLinkedArticleProps) {
+  const domain = extractDomain(url);
 
   return (
     <Link
@@ -55,5 +59,5 @@ export function ChatLinkedArticle({ title, url, ogImage }: ChatLinkedArticleProp
         </div>
       </div>
     </Link>
-  )
+  );
 }

@@ -6,11 +6,17 @@
  * sanitizing the HTML (e.g. via sanitizeHtml from lib/sanitize).
  */
 interface SanitizedHTMLProps {
-  html: string
-  className?: string
-  as?: 'div' | 'span'
+  html: string;
+  className?: string;
+  as?: "div" | "span";
 }
 
-export function SanitizedHTML({ html, className, as: Tag = 'div' }: SanitizedHTMLProps) {
-  return <Tag className={className} dangerouslySetInnerHTML={{ __html: html }} />
+export function SanitizedHTML({
+  html,
+  className,
+  as: Tag = "div",
+}: SanitizedHTMLProps) {
+  return (
+    <Tag className={className} dangerouslySetInnerHTML={{ __html: html }} />
+  );
 }

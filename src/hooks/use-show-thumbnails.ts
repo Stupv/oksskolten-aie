@@ -1,10 +1,14 @@
-import { createLocalStorageHook } from './create-local-storage-hook'
+import { createLocalStorageHook } from "./create-local-storage-hook";
 
-export type ShowThumbnails = 'on' | 'off'
+export type ShowThumbnails = "on" | "off";
 
-const useHook = createLocalStorageHook<ShowThumbnails>('show-thumbnails', 'on', ['on', 'off'])
+const useHook = createLocalStorageHook<ShowThumbnails>(
+  "show-thumbnails",
+  "on",
+  ["on", "off"],
+);
 
 export function useShowThumbnails() {
-  const [showThumbnails, setShowThumbnails] = useHook()
-  return { showThumbnails, setShowThumbnails }
+  const [showThumbnails, setShowThumbnails] = useHook();
+  return { showThumbnails, setShowThumbnails };
 }

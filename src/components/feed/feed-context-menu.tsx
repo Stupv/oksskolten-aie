@@ -1,6 +1,14 @@
-import { type ReactNode } from 'react'
-import { Pencil, CheckCheck, Trash2, FolderInput, RefreshCw, Search } from 'lucide-react'
-import { useI18n } from '../../lib/i18n'
+import { type ReactNode } from "react";
+import {
+  Pencil,
+  CheckCheck,
+  Trash2,
+  AlertTriangle,
+  FolderInput,
+  RefreshCw,
+  Search,
+} from "lucide-react";
+import { useI18n } from "../../lib/i18n";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -10,18 +18,18 @@ import {
   ContextMenuSubTrigger,
   ContextMenuSubContent,
   ContextMenuSeparator,
-} from '../ui/context-menu'
+} from "../ui/context-menu";
 
 interface FeedMenuProps {
-  children: ReactNode
-  feedType?: 'rss' | 'clip'
-  categories?: Array<{ id: number; name: string }>
-  onRename: () => void
-  onMarkAllRead: () => void
-  onDelete: () => void
-  onMoveToCategory?: (categoryId: number | null) => void
-  onFetch?: () => void
-  onReDetect?: () => void
+  children: ReactNode;
+  feedType?: "rss" | "clip";
+  categories?: Array<{ id: number; name: string }>;
+  onRename: () => void;
+  onMarkAllRead: () => void;
+  onDelete: () => void;
+  onMoveToCategory?: (categoryId: number | null) => void;
+  onFetch?: () => void;
+  onReDetect?: () => void;
 }
 
 export function FeedContextMenu({
@@ -35,36 +43,37 @@ export function FeedContextMenu({
   onFetch,
   onReDetect,
 }: FeedMenuProps) {
-  const { t } = useI18n()
-  const isClip = feedType === 'clip'
+  const { t } = useI18n();
+  const isClip = feedType === "clip";
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        {children}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem onSelect={onRename}>
           <Pencil size={16} strokeWidth={1.5} />
-          {t('feeds.rename')}
+          {t("feeds.rename")}
         </ContextMenuItem>
         <ContextMenuItem onSelect={onMarkAllRead}>
           <CheckCheck size={16} strokeWidth={1.5} />
-          {t('feeds.markAllRead')}
+          {t("feeds.markAllRead")}
         </ContextMenuItem>
 
         {!isClip && onMoveToCategory && (
           <ContextMenuSub>
             <ContextMenuSubTrigger>
               <FolderInput size={16} strokeWidth={1.5} />
-              {t('category.moveToCategory')}
+              {t("category.moveToCategory")}
             </ContextMenuSubTrigger>
             <ContextMenuSubContent>
               <ContextMenuItem onSelect={() => onMoveToCategory(null)}>
-                {t('category.uncategorized')}
+                {t("category.uncategorized")}
               </ContextMenuItem>
-              {categories.map(cat => (
-                <ContextMenuItem key={cat.id} onSelect={() => onMoveToCategory(cat.id)}>
+              {categories.map((cat) => (
+                <ContextMenuItem
+                  key={cat.id}
+                  onSelect={() => onMoveToCategory(cat.id)}
+                >
                   {cat.name}
                 </ContextMenuItem>
               ))}
@@ -75,14 +84,14 @@ export function FeedContextMenu({
         {onFetch && !isClip && (
           <ContextMenuItem onSelect={onFetch}>
             <RefreshCw size={16} strokeWidth={1.5} />
-            {t('feeds.fetch')}
+            {t("feeds.fetch")}
           </ContextMenuItem>
         )}
 
         {!isClip && onReDetect && (
           <ContextMenuItem onSelect={onReDetect}>
             <Search size={16} strokeWidth={1.5} />
-            {t('feeds.reDetect')}
+            {t("feeds.reDetect")}
           </ContextMenuItem>
         )}
 
@@ -91,23 +100,25 @@ export function FeedContextMenu({
             <ContextMenuSeparator />
             <ContextMenuItem onSelect={onDelete} className="text-error">
               <Trash2 size={16} strokeWidth={1.5} />
-              {t('feeds.delete')}
+              {t("feeds.delete")}
             </ContextMenuItem>
           </>
         )}
       </ContextMenuContent>
     </ContextMenu>
-  )
+  );
 }
 
 interface MultiSelectMenuProps {
-  children: ReactNode
-  selectedCount: number
-  categories: Array<{ id: number; name: string }>
-  onMoveToCategory: (categoryId: number | null) => void
-  onMarkAllRead: () => void
-  onFetch: () => void
-  onDelete: () => void
+  children: ReactNode;
+  selectedCount: number;
+  categories: Array<{ id: number; name: string }>;
+  onMoveToCategory: (categoryId: number | null) => void;
+  onMarkAllRead: () => void;
+  onFetch: () => void;
+  onDelete: () => void;
+  deadFeedCount?: number;
+  onRemoveAllDeadFeeds?: () => void;
 }
 
 export function MultiSelectContextMenu({
@@ -118,30 +129,33 @@ export function MultiSelectContextMenu({
   onMarkAllRead,
   onFetch,
   onDelete,
+  deadFeedCount,
+  onRemoveAllDeadFeeds,
 }: MultiSelectMenuProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        {children}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent>
         <div className="px-2 py-1.5 text-[11px] text-muted">
-          {t('feeds.selectedCount', { count: String(selectedCount) })}
+          {t("feeds.selectedCount", { count: String(selectedCount) })}
         </div>
         <ContextMenuSeparator />
         <ContextMenuSub>
           <ContextMenuSubTrigger>
             <FolderInput size={16} strokeWidth={1.5} />
-            {t('feeds.bulkMoveToCategory')}
+            {t("feeds.bulkMoveToCategory")}
           </ContextMenuSubTrigger>
           <ContextMenuSubContent>
             <ContextMenuItem onSelect={() => onMoveToCategory(null)}>
-              {t('category.uncategorized')}
+              {t("category.uncategorized")}
             </ContextMenuItem>
-            {categories.map(cat => (
-              <ContextMenuItem key={cat.id} onSelect={() => onMoveToCategory(cat.id)}>
+            {categories.map((cat) => (
+              <ContextMenuItem
+                key={cat.id}
+                onSelect={() => onMoveToCategory(cat.id)}
+              >
                 {cat.name}
               </ContextMenuItem>
             ))}
@@ -149,28 +163,40 @@ export function MultiSelectContextMenu({
         </ContextMenuSub>
         <ContextMenuItem onSelect={onMarkAllRead}>
           <CheckCheck size={16} strokeWidth={1.5} />
-          {t('feeds.bulkMarkAllRead')}
+          {t("feeds.bulkMarkAllRead")}
         </ContextMenuItem>
         <ContextMenuItem onSelect={onFetch}>
           <RefreshCw size={16} strokeWidth={1.5} />
-          {t('feeds.bulkFetch')}
+          {t("feeds.bulkFetch")}
         </ContextMenuItem>
+        {deadFeedCount != null && deadFeedCount > 0 && onRemoveAllDeadFeeds && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              onSelect={onRemoveAllDeadFeeds}
+              className="text-error"
+            >
+              <AlertTriangle size={16} strokeWidth={1.5} />
+              {t("feeds.removeAllDeadFeeds")}
+            </ContextMenuItem>
+          </>
+        )}
         <ContextMenuSeparator />
         <ContextMenuItem onSelect={onDelete} className="text-error">
           <Trash2 size={16} strokeWidth={1.5} />
-          {t('feeds.bulkDelete', { count: String(selectedCount) })}
+          {t("feeds.bulkDelete", { count: String(selectedCount) })}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
-  )
+  );
 }
 
 interface CategoryMenuProps {
-  children: ReactNode
-  onRename: () => void
-  onMarkAllRead: () => void
-  onDelete: () => void
-  onFetch?: () => void
+  children: ReactNode;
+  onRename: () => void;
+  onMarkAllRead: () => void;
+  onDelete: () => void;
+  onFetch?: () => void;
 }
 
 export function CategoryContextMenu({
@@ -180,34 +206,32 @@ export function CategoryContextMenu({
   onDelete,
   onFetch,
 }: CategoryMenuProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        {children}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem onSelect={onRename}>
           <Pencil size={16} strokeWidth={1.5} />
-          {t('category.rename')}
+          {t("category.rename")}
         </ContextMenuItem>
         <ContextMenuItem onSelect={onMarkAllRead}>
           <CheckCheck size={16} strokeWidth={1.5} />
-          {t('category.markAllRead')}
+          {t("category.markAllRead")}
         </ContextMenuItem>
         {onFetch && (
           <ContextMenuItem onSelect={onFetch}>
             <RefreshCw size={16} strokeWidth={1.5} />
-            {t('category.fetchAll')}
+            {t("category.fetchAll")}
           </ContextMenuItem>
         )}
         <ContextMenuSeparator />
         <ContextMenuItem onSelect={onDelete} className="text-error">
           <Trash2 size={16} strokeWidth={1.5} />
-          {t('category.delete')}
+          {t("category.delete")}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
-  )
+  );
 }

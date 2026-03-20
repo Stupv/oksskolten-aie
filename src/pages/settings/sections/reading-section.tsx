@@ -1,43 +1,63 @@
-import { useI18n } from '../../../lib/i18n'
-import { PreviewCard } from '../../../components/settings/preview-card'
-import { useAppLayout } from '../../../app'
-import { RadioGroup } from '@/components/ui/radio-group'
+import { useI18n } from "../../../lib/i18n";
+import { PreviewCard } from "../../../components/settings/preview-card";
+import { useAppLayout } from "../../../app";
+import { RadioGroup } from "@/components/ui/radio-group";
 
 export function ReadingSection() {
-  const { settings } = useAppLayout()
+  const { settings } = useAppLayout();
   const {
-    autoMarkRead, setAutoMarkRead,
-    keyboardNavigation, setKeyboardNavigation,
-    showUnreadIndicator, setShowUnreadIndicator,
+    autoMarkRead,
+    setAutoMarkRead,
+    keyboardNavigation,
+    setKeyboardNavigation,
+    showUnreadIndicator,
+    setShowUnreadIndicator,
     indicatorStyle,
-    internalLinks, setInternalLinks,
-    categoryUnreadOnly, setCategoryUnreadOnly,
-    showThumbnails, setShowThumbnails,
-    showFeedActivity, setShowFeedActivity,
-    chatPosition, setChatPosition,
-    articleOpenMode, setArticleOpenMode,
-    dateMode, setDateMode,
-  } = settings
-  const { t, locale } = useI18n()
+    internalLinks,
+    setInternalLinks,
+    categoryUnreadOnly,
+    setCategoryUnreadOnly,
+    showThumbnails,
+    setShowThumbnails,
+    showFeedActivity,
+    setShowFeedActivity,
+    chatPosition,
+    setChatPosition,
+    articleOpenMode,
+    setArticleOpenMode,
+    dateMode,
+    setDateMode,
+  } = settings;
+  const { t, locale } = useI18n();
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-text mb-4">{t('settings.reading')}</h2>
+      <h2 className="text-base font-semibold text-text mb-4">
+        {t("settings.reading")}
+      </h2>
 
       <div>
-        <p className="text-sm text-text mb-1">{t('settings.unreadIndicator')}</p>
-        <p className="text-xs text-muted mb-3">{t(indicatorStyle === 'dot' ? 'settings.unreadIndicatorDescDot' : 'settings.unreadIndicatorDescLine')}</p>
+        <p className="text-sm text-text mb-1">
+          {t("settings.unreadIndicator")}
+        </p>
+        <p className="text-xs text-muted mb-3">
+          {t(
+            indicatorStyle === "dot"
+              ? "settings.unreadIndicatorDescDot"
+              : "settings.unreadIndicatorDescLine",
+          )}
+        </p>
         <div className="flex gap-3">
-          {([
-            { value: 'on' as const, label: t('settings.unreadIndicatorOn') },
-            { value: 'off' as const, label: t('settings.unreadIndicatorOff') },
-          ]).map(option => {
-            const isOn = option.value === 'on'
+          {[
+            { value: "on" as const, label: t("settings.unreadIndicatorOn") },
+            { value: "off" as const, label: t("settings.unreadIndicatorOff") },
+          ].map((option) => {
+            const isOn = option.value === "on";
             const rows = [
-              { unread: true, titleW: 'w-4/5', excerptW: 'w-3/5' },
-              { unread: true, titleW: 'w-full', excerptW: 'w-2/5' },
-              { unread: false, titleW: 'w-3/5', excerptW: 'w-1/2' },
-            ]
+              { unread: true, titleW: "w-4/5", excerptW: "w-3/5" },
+              { unread: true, titleW: "w-full", excerptW: "w-2/5" },
+              { unread: false, titleW: "w-3/5", excerptW: "w-1/2" },
+            ];
             return (
               <PreviewCard
                 key={option.value}
@@ -49,38 +69,51 @@ export function ReadingSection() {
               >
                 <div className="w-full h-full bg-bg-card p-2.5 flex flex-col justify-between">
                   {rows.map((row, i) => (
-                    <div key={i} className={`flex items-center gap-2 ${i > 0 ? 'border-t border-border pt-1.5' : ''}`}>
-                      {isOn && indicatorStyle === 'dot' && (
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${row.unread ? 'bg-accent' : 'opacity-0'}`} />
+                    <div
+                      key={i}
+                      className={`flex items-center gap-2 ${i > 0 ? "border-t border-border pt-1.5" : ""}`}
+                    >
+                      {isOn && indicatorStyle === "dot" && (
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${row.unread ? "bg-accent" : "opacity-0"}`}
+                        />
                       )}
-                      <div className={`flex-1 space-y-1 ${isOn && indicatorStyle === 'line' ? `border-l ${row.unread ? 'border-l-accent' : 'border-l-transparent'}` : ''} ${isOn && indicatorStyle === 'line' ? 'pl-1.5' : ''}`}>
-                        <div className={`${row.titleW} h-2 rounded-full ${row.unread ? 'bg-text/25' : 'bg-text/10'}`} />
-                        <div className={`${row.excerptW} h-1.5 rounded-full bg-text/8`} />
+                      <div
+                        className={`flex-1 space-y-1 ${isOn && indicatorStyle === "line" ? `border-l ${row.unread ? "border-l-accent" : "border-l-transparent"}` : ""} ${isOn && indicatorStyle === "line" ? "pl-1.5" : ""}`}
+                      >
+                        <div
+                          className={`${row.titleW} h-2 rounded-full ${row.unread ? "bg-text/25" : "bg-text/10"}`}
+                        />
+                        <div
+                          className={`${row.excerptW} h-1.5 rounded-full bg-text/8`}
+                        />
                       </div>
                       <div className="w-5 h-5 rounded-sm bg-border/30 shrink-0" />
                     </div>
                   ))}
                 </div>
               </PreviewCard>
-            )
+            );
           })}
         </div>
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.showThumbnails')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.showThumbnailsDesc')}</p>
+        <p className="text-sm text-text mb-1">{t("settings.showThumbnails")}</p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.showThumbnailsDesc")}
+        </p>
         <div className="flex gap-3">
-          {([
-            { value: 'on' as const, label: t('settings.showThumbnailsOn') },
-            { value: 'off' as const, label: t('settings.showThumbnailsOff') },
-          ]).map(option => {
-            const isOn = option.value === 'on'
+          {[
+            { value: "on" as const, label: t("settings.showThumbnailsOn") },
+            { value: "off" as const, label: t("settings.showThumbnailsOff") },
+          ].map((option) => {
+            const isOn = option.value === "on";
             const rows = [
-              { titleW: 'w-4/5', excerptW: 'w-3/5' },
-              { titleW: 'w-full', excerptW: 'w-2/5' },
-              { titleW: 'w-3/5', excerptW: 'w-1/2' },
-            ]
+              { titleW: "w-4/5", excerptW: "w-3/5" },
+              { titleW: "w-full", excerptW: "w-2/5" },
+              { titleW: "w-3/5", excerptW: "w-1/2" },
+            ];
             return (
               <PreviewCard
                 key={option.value}
@@ -92,14 +125,29 @@ export function ReadingSection() {
               >
                 <div className="w-full h-full bg-bg-card p-2.5 flex flex-col justify-between">
                   {rows.map((row, i) => (
-                    <div key={i} className={`flex items-center gap-2 ${i > 0 ? 'border-t border-border pt-1.5' : ''}`}>
+                    <div
+                      key={i}
+                      className={`flex items-center gap-2 ${i > 0 ? "border-t border-border pt-1.5" : ""}`}
+                    >
                       <div className="flex-1 min-w-0 space-y-1">
-                        <div className={`${row.titleW} h-2 rounded-full bg-text/25`} />
-                        <div className={`${row.excerptW} h-1.5 rounded-full bg-text/8`} />
+                        <div
+                          className={`${row.titleW} h-2 rounded-full bg-text/25`}
+                        />
+                        <div
+                          className={`${row.excerptW} h-1.5 rounded-full bg-text/8`}
+                        />
                       </div>
                       {isOn && (
                         <div className="w-6 h-6 rounded-sm shrink-0 bg-accent/20 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent/50">
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            className="text-accent/50"
+                          >
                             <rect x="3" y="3" width="18" height="18" rx="2" />
                             <circle cx="8.5" cy="8.5" r="1.5" />
                             <path d="m21 15-5-5L5 21" />
@@ -110,26 +158,30 @@ export function ReadingSection() {
                   ))}
                 </div>
               </PreviewCard>
-            )
+            );
           })}
         </div>
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.showFeedActivity')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.showFeedActivityDesc')}</p>
+        <p className="text-sm text-text mb-1">
+          {t("settings.showFeedActivity")}
+        </p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.showFeedActivityDesc")}
+        </p>
         <div className="flex gap-3">
-          {([
-            { value: 'on' as const, label: t('settings.showFeedActivityOn') },
-            { value: 'off' as const, label: t('settings.showFeedActivityOff') },
-          ]).map(option => {
-            const isOn = option.value === 'on'
+          {[
+            { value: "on" as const, label: t("settings.showFeedActivityOn") },
+            { value: "off" as const, label: t("settings.showFeedActivityOff") },
+          ].map((option) => {
+            const isOn = option.value === "on";
             const rows = [
-              { titleW: 'w-4/5', excerptW: 'w-3/5' },
-              { titleW: 'w-full', excerptW: 'w-2/5' },
-              { titleW: 'w-3/5', excerptW: 'w-1/2' },
-            ]
-            const metricsText = t('metrics.preview')
+              { titleW: "w-4/5", excerptW: "w-3/5" },
+              { titleW: "w-full", excerptW: "w-2/5" },
+              { titleW: "w-3/5", excerptW: "w-1/2" },
+            ];
+            const metricsText = t("metrics.preview");
             return (
               <PreviewCard
                 key={option.value}
@@ -142,15 +194,26 @@ export function ReadingSection() {
                 <div className="w-full h-full bg-bg-card flex flex-col">
                   {isOn && (
                     <div className="px-2.5 pt-2 pb-1">
-                      <span className="text-[9px] leading-none text-muted/60">{metricsText}</span>
+                      <span className="text-[9px] leading-none text-muted/60">
+                        {metricsText}
+                      </span>
                     </div>
                   )}
-                  <div className={`flex-1 px-2.5 ${isOn ? 'pt-0' : 'pt-2.5'} pb-2.5 flex flex-col justify-between`}>
+                  <div
+                    className={`flex-1 px-2.5 ${isOn ? "pt-0" : "pt-2.5"} pb-2.5 flex flex-col justify-between`}
+                  >
                     {rows.map((row, i) => (
-                      <div key={i} className={`flex items-center gap-2 ${i > 0 ? 'border-t border-border pt-1.5' : ''}`}>
+                      <div
+                        key={i}
+                        className={`flex items-center gap-2 ${i > 0 ? "border-t border-border pt-1.5" : ""}`}
+                      >
                         <div className="flex-1 min-w-0 space-y-1">
-                          <div className={`${row.titleW} h-2 rounded-full bg-text/25`} />
-                          <div className={`${row.excerptW} h-1.5 rounded-full bg-text/8`} />
+                          <div
+                            className={`${row.titleW} h-2 rounded-full bg-text/25`}
+                          />
+                          <div
+                            className={`${row.excerptW} h-1.5 rounded-full bg-text/8`}
+                          />
                         </div>
                         <div className="w-5 h-5 rounded-sm bg-border/30 shrink-0" />
                       </div>
@@ -158,27 +221,45 @@ export function ReadingSection() {
                   </div>
                 </div>
               </PreviewCard>
-            )
+            );
           })}
         </div>
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.dateFormat')}</p>
+        <p className="text-sm text-text mb-1">{t("settings.dateFormat")}</p>
         <div className="flex gap-3 mt-3">
-          {([
-            { value: 'relative' as const, label: t('feeds.dateRelative'), dates: (() => {
-              const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'always', style: 'narrow' })
-              return [rtf.format(-3, 'hour'), rtf.format(-2, 'day'), rtf.format(-1, 'week')]
-            })() },
-            { value: 'absolute' as const, label: t('feeds.dateAbsolute'), dates: (() => {
-              const now = new Date()
-              return [1, 2, 7].map(daysAgo => {
-                const d = new Date(now.getTime() - daysAgo * 86400_000)
-                return d.toLocaleDateString(locale, { month: 'numeric', day: 'numeric' })
-              })
-            })() },
-          ]).map(mode => (
+          {[
+            {
+              value: "relative" as const,
+              label: t("feeds.dateRelative"),
+              dates: (() => {
+                const rtf = new Intl.RelativeTimeFormat(locale, {
+                  numeric: "always",
+                  style: "narrow",
+                });
+                return [
+                  rtf.format(-3, "hour"),
+                  rtf.format(-2, "day"),
+                  rtf.format(-1, "week"),
+                ];
+              })(),
+            },
+            {
+              value: "absolute" as const,
+              label: t("feeds.dateAbsolute"),
+              dates: (() => {
+                const now = new Date();
+                return [1, 2, 7].map((daysAgo) => {
+                  const d = new Date(now.getTime() - daysAgo * 86400_000);
+                  return d.toLocaleDateString(locale, {
+                    month: "numeric",
+                    day: "numeric",
+                  });
+                });
+              })(),
+            },
+          ].map((mode) => (
             <PreviewCard
               key={mode.value}
               selected={dateMode === mode.value}
@@ -189,12 +270,21 @@ export function ReadingSection() {
             >
               <div className="w-full h-full bg-bg-card p-2.5 flex flex-col justify-between">
                 {mode.dates.map((d, i) => (
-                  <div key={i} className={`flex items-center gap-2 ${i > 0 ? 'border-t border-border pt-1.5' : ''}`}>
+                  <div
+                    key={i}
+                    className={`flex items-center gap-2 ${i > 0 ? "border-t border-border pt-1.5" : ""}`}
+                  >
                     <div className="flex-1 space-y-1">
-                      <div className={`${i === 0 ? 'w-full' : i === 1 ? 'w-4/5' : 'w-3/5'} h-2 rounded-full bg-text/15`} />
-                      <div className={`${i === 0 ? 'w-3/5' : 'w-2/5'} h-1.5 rounded-full bg-text/8`} />
+                      <div
+                        className={`${i === 0 ? "w-full" : i === 1 ? "w-4/5" : "w-3/5"} h-2 rounded-full bg-text/15`}
+                      />
+                      <div
+                        className={`${i === 0 ? "w-3/5" : "w-2/5"} h-1.5 rounded-full bg-text/8`}
+                      />
                     </div>
-                    <span className="text-[10px] leading-none text-muted shrink-0 font-medium tabular-nums">{d}</span>
+                    <span className="text-[10px] leading-none text-muted shrink-0 font-medium tabular-nums">
+                      {d}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -204,13 +294,18 @@ export function ReadingSection() {
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.chatPosition')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.chatPositionDesc')}</p>
+        <p className="text-sm text-text mb-1">{t("settings.chatPosition")}</p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.chatPositionDesc")}
+        </p>
         <div className="flex gap-3">
-          {([
-            { value: 'fab' as const, label: t('settings.chatPositionFab') },
-            { value: 'inline' as const, label: t('settings.chatPositionInline') },
-          ]).map(option => (
+          {[
+            { value: "fab" as const, label: t("settings.chatPositionFab") },
+            {
+              value: "inline" as const,
+              label: t("settings.chatPositionInline"),
+            },
+          ].map((option) => (
             <PreviewCard
               key={option.value}
               selected={chatPosition === option.value}
@@ -219,7 +314,7 @@ export function ReadingSection() {
               sizeClass="w-full md:w-[160px] h-[112px]"
               className="flex-1 md:flex-none"
             >
-              {option.value === 'fab' ? (
+              {option.value === "fab" ? (
                 <div className="w-full h-full bg-bg-card py-2.5 flex flex-col items-center relative">
                   <div className="w-3/5 flex-1 space-y-1.5">
                     <div className="w-full h-1.5 rounded-full bg-muted opacity-30" />
@@ -230,7 +325,16 @@ export function ReadingSection() {
                     <div className="w-2/3 h-1.5 rounded-full bg-muted opacity-30" />
                   </div>
                   <div className="absolute bottom-2 right-3 w-7 h-7 rounded-full bg-accent flex items-center justify-center shadow-sm">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2z" />
                       <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
                     </svg>
@@ -248,7 +352,17 @@ export function ReadingSection() {
                         <div className="w-2.5 h-2.5 rounded-sm bg-muted opacity-40" />
                       </div>
                       <div className="w-5 h-5 rounded bg-accent/30 flex items-center justify-center">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-accent"
+                        >
                           <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2z" />
                           <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
                         </svg>
@@ -266,13 +380,23 @@ export function ReadingSection() {
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.articleOpenMode')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.articleOpenModeDesc')}</p>
+        <p className="text-sm text-text mb-1">
+          {t("settings.articleOpenMode")}
+        </p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.articleOpenModeDesc")}
+        </p>
         <div className="flex gap-3">
-          {([
-            { value: 'page' as const, label: t('settings.articleOpenModePage') },
-            { value: 'overlay' as const, label: t('settings.articleOpenModeOverlay') },
-          ]).map(option => (
+          {[
+            {
+              value: "page" as const,
+              label: t("settings.articleOpenModePage"),
+            },
+            {
+              value: "overlay" as const,
+              label: t("settings.articleOpenModeOverlay"),
+            },
+          ].map((option) => (
             <PreviewCard
               key={option.value}
               selected={articleOpenMode === option.value}
@@ -281,7 +405,7 @@ export function ReadingSection() {
               sizeClass="w-full md:w-[160px] h-[112px]"
               className="flex-1 md:flex-none"
             >
-              {option.value === 'page' ? (
+              {option.value === "page" ? (
                 <div className="w-full h-full bg-bg-card flex flex-col">
                   {/* Page transition preview: list → detail */}
                   <div className="flex-1 flex items-center justify-center gap-2 px-3">
@@ -293,7 +417,17 @@ export function ReadingSection() {
                       <div className="w-2/3 h-1 rounded-full bg-text/15" />
                     </div>
                     {/* Arrow */}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted/50 shrink-0">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-muted/50 shrink-0"
+                    >
                       <path d="M5 12h14" />
                       <path d="m12 5 7 7-7 7" />
                     </svg>
@@ -337,13 +471,15 @@ export function ReadingSection() {
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.autoMarkRead')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.autoMarkReadDesc')}</p>
+        <p className="text-sm text-text mb-1">{t("settings.autoMarkRead")}</p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.autoMarkReadDesc")}
+        </p>
         <RadioGroup
           name="autoMarkRead"
           options={[
-            { value: 'on' as const, label: t('settings.autoMarkReadOn') },
-            { value: 'off' as const, label: t('settings.autoMarkReadOff') },
+            { value: "on" as const, label: t("settings.autoMarkReadOn") },
+            { value: "off" as const, label: t("settings.autoMarkReadOff") },
           ]}
           value={autoMarkRead}
           onChange={setAutoMarkRead}
@@ -351,13 +487,15 @@ export function ReadingSection() {
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.internalLinks')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.internalLinksDesc')}</p>
+        <p className="text-sm text-text mb-1">{t("settings.internalLinks")}</p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.internalLinksDesc")}
+        </p>
         <RadioGroup
           name="internalLinks"
           options={[
-            { value: 'on' as const, label: t('settings.internalLinksOn') },
-            { value: 'off' as const, label: t('settings.internalLinksOff') },
+            { value: "on" as const, label: t("settings.internalLinksOn") },
+            { value: "off" as const, label: t("settings.internalLinksOff") },
           ]}
           value={internalLinks}
           onChange={setInternalLinks}
@@ -365,13 +503,20 @@ export function ReadingSection() {
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.categoryUnreadOnly')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.categoryUnreadOnlyDesc')}</p>
+        <p className="text-sm text-text mb-1">
+          {t("settings.categoryUnreadOnly")}
+        </p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.categoryUnreadOnlyDesc")}
+        </p>
         <RadioGroup
           name="categoryUnreadOnly"
           options={[
-            { value: 'on' as const, label: t('settings.categoryUnreadOnlyOn') },
-            { value: 'off' as const, label: t('settings.categoryUnreadOnlyOff') },
+            { value: "on" as const, label: t("settings.categoryUnreadOnlyOn") },
+            {
+              value: "off" as const,
+              label: t("settings.categoryUnreadOnlyOff"),
+            },
           ]}
           value={categoryUnreadOnly}
           onChange={setCategoryUnreadOnly}
@@ -379,19 +524,25 @@ export function ReadingSection() {
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-text mb-1">{t('settings.keyboardNavigation')}</p>
-        <p className="text-xs text-muted mb-3">{t('settings.keyboardNavigationDesc')}</p>
+        <p className="text-sm text-text mb-1">
+          {t("settings.keyboardNavigation")}
+        </p>
+        <p className="text-xs text-muted mb-3">
+          {t("settings.keyboardNavigationDesc")}
+        </p>
         <RadioGroup
           name="keyboardNavigation"
           options={[
-            { value: 'on' as const, label: t('settings.keyboardNavigationOn') },
-            { value: 'off' as const, label: t('settings.keyboardNavigationOff') },
+            { value: "on" as const, label: t("settings.keyboardNavigationOn") },
+            {
+              value: "off" as const,
+              label: t("settings.keyboardNavigationOff"),
+            },
           ]}
           value={keyboardNavigation}
           onChange={setKeyboardNavigation}
         />
       </div>
-
     </section>
-  )
+  );
 }

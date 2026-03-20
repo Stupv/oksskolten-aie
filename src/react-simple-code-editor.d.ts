@@ -1,5 +1,5 @@
-declare module 'react-simple-code-editor' {
-  import * as React from 'react';
+declare module "react-simple-code-editor" {
+  import * as React from "react";
 
   interface EditorProps {
     value: string;

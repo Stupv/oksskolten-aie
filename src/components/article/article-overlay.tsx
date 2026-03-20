@@ -1,16 +1,21 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { X } from 'lucide-react'
-import { Dialog, DialogPortal, DialogOverlay, DialogTitle } from '../ui/dialog'
-import { ArticleDetail } from './article-detail'
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
+import { Dialog, DialogPortal, DialogOverlay, DialogTitle } from "../ui/dialog";
+import { ArticleDetail } from "./article-detail";
 
 interface ArticleOverlayProps {
-  articleUrl: string | null
-  onClose: () => void
+  articleUrl: string | null;
+  onClose: () => void;
 }
 
 export function ArticleOverlay({ articleUrl, onClose }: ArticleOverlayProps) {
   return (
-    <Dialog open={!!articleUrl} onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog
+      open={!!articleUrl}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogPortal>
         <DialogOverlay className="duration-300" />
         <DialogPrimitive.Content
@@ -20,7 +25,10 @@ export function ArticleOverlay({ articleUrl, onClose }: ArticleOverlayProps) {
         >
           <DialogTitle className="sr-only">Article</DialogTitle>
           {/* Close button */}
-          <div className="sticky top-0 z-10 flex items-center h-12 px-4 bg-bg/80 backdrop-blur-sm border-b border-border" style={{ paddingTop: 'var(--safe-area-inset-top)' }}>
+          <div
+            className="sticky top-0 z-10 flex items-center h-12 px-4 bg-bg/80 backdrop-blur-sm border-b border-border"
+            style={{ paddingTop: "var(--safe-area-inset-top)" }}
+          >
             <button
               onClick={onClose}
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-hover transition-colors"
@@ -33,5 +41,5 @@ export function ArticleOverlay({ articleUrl, onClose }: ArticleOverlayProps) {
         </DialogPrimitive.Content>
       </DialogPortal>
     </Dialog>
-  )
+  );
 }

@@ -1,12 +1,12 @@
-import { useI18n } from '../../lib/i18n'
-import { useAppLayout } from '../../app'
-import { Separator } from '@/components/ui/separator'
-import { ProviderConfigSection } from './sections/provider-config-section'
-import { TaskModelSection } from './sections/task-model-section'
+import { useI18n } from "../../lib/i18n";
+import { useAppLayout } from "../../app";
+import { Separator } from "@/components/ui/separator";
+import { ProviderConfigSection } from "./sections/provider-config-section";
+import { TaskModelSection } from "./sections/task-model-section";
 
 export function IntegrationTab() {
-  const { settings } = useAppLayout()
-  const { t } = useI18n()
+  const { settings } = useAppLayout();
+  const { t } = useI18n();
 
   return (
     <>
@@ -14,5 +14,5 @@ export function IntegrationTab() {
       <Separator />
       <TaskModelSection settings={settings} t={t} />
     </>
-  )
+  );
 }

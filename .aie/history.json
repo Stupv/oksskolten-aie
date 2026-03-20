@@ -1,0 +1,31 @@
+[
+  {
+    "run_id": "run-001",
+    "project_name": "oksskolten",
+    "started_at": "2026-03-20T11:59:50.696470Z",
+    "status": "completed",
+    "metrics_summary": {
+      "eslint_violations": 0.0,
+      "tsc_errors": 3539.0,
+      "prettier_violations": 213.0,
+      "dockerfile_issues": 2.0
+    },
+    "proposals_count": 5,
+    "tasks_count": 5,
+    "run_type": "single",
+    "findings_count": 0,
+    "backlog_items_count": 0
+  },
+  {
+    "run_id": "run-002",
+    "project_name": "oksskolten",
+    "started_at": "2026-03-20T11:59:52.917056Z",
+    "status": "completed",
+    "metrics_summary": {},
+    "proposals_count": 0,
+    "tasks_count": 0,
+    "run_type": "review",
+    "findings_count": 18,
+    "backlog_items_count": 0
+  }
+]

@@ -1,23 +1,23 @@
-import { Component, type ReactNode } from 'react'
+import { Component, type ReactNode } from "react";
 
 interface State {
-  error: Error | null
+  error: Error | null;
 }
 
 export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
-  state: State = { error: null }
+  state: State = { error: null };
 
   static getDerivedStateFromError(error: Error) {
-    return { error }
+    return { error };
   }
 
   private handleRetry = () => {
-    this.setState({ error: null })
-  }
+    this.setState({ error: null });
+  };
 
   private handleGoHome = () => {
-    window.location.href = '/'
-  }
+    window.location.href = "/";
+  };
 
   render() {
     if (this.state.error) {
@@ -51,8 +51,8 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
             </details>
           </div>
         </div>
-      )
+      );
     }
-    return this.props.children
+    return this.props.children;
   }
 }

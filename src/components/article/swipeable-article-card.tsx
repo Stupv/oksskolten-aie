@@ -1,21 +1,26 @@
-import { useRef } from 'react'
-import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
-import { ArticleCard, type ArticleDisplayConfig } from './article-card'
-import { articleUrlToPath } from '../../lib/url'
-import type { ArticleListItem } from '../../../shared/types'
-import type { LayoutName } from '../../data/layouts'
+import { useRef } from "react";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  type PanInfo,
+} from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { ArticleCard, type ArticleDisplayConfig } from "./article-card";
+import { articleUrlToPath } from "../../lib/url";
+import type { ArticleListItem } from "../../../shared/types";
+import type { LayoutName } from "../../data/layouts";
 
 interface SwipeableArticleCardProps extends ArticleDisplayConfig {
-  article: ArticleListItem
-  layout?: LayoutName
-  isFeatured?: boolean
-  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
+  article: ArticleListItem;
+  layout?: LayoutName;
+  isFeatured?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-const SWIPE_THRESHOLD = 80
-const VELOCITY_THRESHOLD = 500
+const SWIPE_THRESHOLD = 80;
+const VELOCITY_THRESHOLD = 500;
 
 export function SwipeableArticleCard({
   article,
@@ -27,34 +32,37 @@ export function SwipeableArticleCard({
   showThumbnails,
   onClick: onClickProp,
 }: SwipeableArticleCardProps) {
-  const navigate = useNavigate()
-  const x = useMotionValue(0)
-  const isDragging = useRef(false)
+  const navigate = useNavigate();
+  const x = useMotionValue(0);
+  const isDragging = useRef(false);
 
   // Background indicator opacity based on drag distance
-  const leftOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0])
+  const leftOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
-    const { offset, velocity } = info
-    isDragging.current = false
+    const { offset, velocity } = info;
+    isDragging.current = false;
 
     // Left swipe → open article
     if (offset.x < -SWIPE_THRESHOLD || velocity.x < -VELOCITY_THRESHOLD) {
-      void navigate(articleUrlToPath(article.url))
-      return
+      void navigate(articleUrlToPath(article.url));
+      return;
     }
-  }
+  };
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // Let browser handle Cmd+Click, Ctrl+Click natively (open in new tab)
-    if (e.metaKey || e.ctrlKey || e.button === 1) return
-    e.preventDefault()
+    if (e.metaKey || e.ctrlKey || e.button === 1) return;
+    e.preventDefault();
     // Only navigate if not dragging
     if (!isDragging.current) {
-      if (onClickProp) { onClickProp(e) }
-      else { void navigate(articleUrlToPath(article.url)) }
+      if (onClickProp) {
+        onClickProp(e);
+      } else {
+        void navigate(articleUrlToPath(article.url));
+      }
     }
-  }
+  };
 
   return (
     <div className="relative overflow-hidden select-none">
@@ -73,7 +81,9 @@ export function SwipeableArticleCard({
         dragConstraints={{ left: 0, right: 0 }}
         dragSnapToOrigin
         dragElastic={0.3}
-        onDragStart={() => { isDragging.current = true }}
+        onDragStart={() => {
+          isDragging.current = true;
+        }}
         onDragEnd={handleDragEnd}
         className="relative bg-bg"
       >
@@ -89,5 +99,5 @@ export function SwipeableArticleCard({
         />
       </motion.div>
     </div>
-  )
+  );
 }

@@ -1,38 +1,38 @@
-import { useState, useEffect, useRef } from 'react'
-import { apiPost } from '../../lib/fetcher'
-import { useI18n } from '../../lib/i18n'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
+import { useState, useEffect, useRef } from "react";
+import { apiPost } from "../../lib/fetcher";
+import { useI18n } from "../../lib/i18n";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 interface FolderStepProps {
-  onClose: () => void
-  onCategoryCreated?: () => void
+  onClose: () => void;
+  onCategoryCreated?: () => void;
 }
 
 export function FolderStep({ onClose, onCategoryCreated }: FolderStepProps) {
-  const { t } = useI18n()
-  const [name, setName] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useI18n();
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
+    inputRef.current?.focus();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!name.trim()) return
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    if (!name.trim()) return;
+    setError("");
+    setLoading(true);
     try {
-      await apiPost('/api/categories', { name: name.trim() })
-      onCategoryCreated?.()
-      onClose()
+      await apiPost("/api/categories", { name: name.trim() });
+      onCategoryCreated?.();
+      onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('modal.genericError'))
+      setError(err instanceof Error ? err.message : t("modal.genericError"));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -41,20 +41,20 @@ export function FolderStep({ onClose, onCategoryCreated }: FolderStepProps) {
       <Input
         ref={inputRef}
         type="text"
-        placeholder={t('modal.folderNamePlaceholder')}
+        placeholder={t("modal.folderNamePlaceholder")}
         value={name}
-        onChange={e => setName(e.target.value)}
+        onChange={(e) => setName(e.target.value)}
         required
       />
       {error && <p className="text-xs text-error">{error}</p>}
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onClose}>
-          {t('modal.cancel')}
+          {t("modal.cancel")}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? t('modal.creating') : t('modal.create')}
+          {loading ? t("modal.creating") : t("modal.create")}
         </Button>
       </div>
     </form>
-  )
+  );
 }

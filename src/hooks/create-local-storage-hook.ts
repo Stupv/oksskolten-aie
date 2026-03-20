@@ -1,4 +1,4 @@
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 
 /**
  * Factory that creates a hook backed by localStorage.
@@ -12,21 +12,21 @@ export function createLocalStorageHook<T extends string>(
   defaultValue: T,
   validValues: readonly T[],
 ): () => [T, Dispatch<SetStateAction<T>>] {
-  const allowed = new Set<string>(validValues)
+  const allowed = new Set<string>(validValues);
 
   function getStored(): T {
-    const stored = localStorage.getItem(key)
-    if (stored !== null && allowed.has(stored)) return stored as T
-    return defaultValue
+    const stored = localStorage.getItem(key);
+    if (stored !== null && allowed.has(stored)) return stored as T;
+    return defaultValue;
   }
 
   return function useLocalStorageSetting() {
-    const [value, setValue] = useState<T>(getStored)
+    const [value, setValue] = useState<T>(getStored);
 
     useEffect(() => {
-      localStorage.setItem(key, value)
-    }, [value])
+      localStorage.setItem(key, value);
+    }, [value]);
 
-    return [value, setValue]
-  }
+    return [value, setValue];
+  };
 }

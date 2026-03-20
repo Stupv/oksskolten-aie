@@ -1,57 +1,63 @@
-import { useState, useEffect } from 'react'
-import { MessagesSquare } from 'lucide-react'
-import useSWR from 'swr'
-import { ChatPanel } from './chat-panel'
-import { fetcher } from '../../lib/fetcher'
+import { useState, useEffect } from "react";
+import { MessagesSquare } from "lucide-react";
+import useSWR from "swr";
+import { ChatPanel } from "./chat-panel";
+import { fetcher } from "../../lib/fetcher";
 
 interface ChatFabProps {
-  articleId: number
+  articleId: number;
 }
 
 export function ChatFab({ articleId }: ChatFabProps) {
-  const [panelOpen, setPanelOpen] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(false);
   // Track whether panel has ever been opened — mount ChatPanel only after first open,
   // then keep it alive (hidden) so useChat state is preserved.
-  const [mounted, setMounted] = useState(false)
+  const [mounted, setMounted] = useState(false);
 
   // Check for existing conversations to show badge & auto-open
   const { data: existingConv } = useSWR<{ conversations: { id: string }[] }>(
     `/api/chat/conversations?article_id=${articleId}`,
     fetcher,
     { revalidateOnFocus: false },
-  )
+  );
 
-  const hasConversations = !!existingConv?.conversations?.length
+  const hasConversations = !!existingConv?.conversations?.length;
 
   // Auto-open panel if article already has conversations (desktop only)
   useEffect(() => {
-    if (hasConversations && window.matchMedia('(min-width: 768px)').matches) {
-      setPanelOpen(true)
-      setMounted(true)
+    if (hasConversations && window.matchMedia("(min-width: 768px)").matches) {
+      setPanelOpen(true);
+      setMounted(true);
     }
-  }, [hasConversations])
+  }, [hasConversations]);
 
   // Close panel when viewport shrinks below md breakpoint
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)')
+    const mq = window.matchMedia("(min-width: 768px)");
     const handler = (e: MediaQueryListEvent) => {
-      if (!e.matches) setPanelOpen(false)
-    }
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
+      if (!e.matches) setPanelOpen(false);
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const handleToggle = () => {
-    setPanelOpen(prev => !prev)
-    if (!mounted) setMounted(true)
-  }
+    setPanelOpen((prev) => !prev);
+    if (!mounted) setMounted(true);
+  };
 
   return (
     <>
       {/* Floating chat panel — only mount after first open, then use hidden to preserve state */}
       {mounted && (
-        <div className={`fixed bottom-[calc(5rem+var(--safe-area-inset-bottom))] left-4 right-4 md:left-auto md:right-6 md:w-[380px] z-50 max-h-[500px] flex flex-col bg-bg-card rounded-xl border border-border shadow-lg ${panelOpen ? '' : 'hidden'}`}>
-          <ChatPanel variant="inline" articleId={articleId} onClose={() => setPanelOpen(false)} />
+        <div
+          className={`fixed bottom-[calc(5rem+var(--safe-area-inset-bottom))] left-4 right-4 md:left-auto md:right-6 md:w-[380px] z-50 max-h-[500px] flex flex-col bg-bg-card rounded-xl border border-border shadow-lg ${panelOpen ? "" : "hidden"}`}
+        >
+          <ChatPanel
+            variant="inline"
+            articleId={articleId}
+            onClose={() => setPanelOpen(false)}
+          />
         </div>
       )}
 
@@ -68,5 +74,5 @@ export function ChatFab({ articleId }: ChatFabProps) {
         )}
       </button>
     </>
-  )
+  );
 }

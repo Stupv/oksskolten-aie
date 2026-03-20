@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { MD_BREAKPOINT } from '../lib/breakpoints'
+import { useCallback, useEffect, useRef } from "react";
+import { MD_BREAKPOINT } from "../lib/breakpoints";
 
-const DRAWER_STATE_KEY = 'drawer-open'
+const DRAWER_STATE_KEY = "drawer-open";
 
 /**
  * Swipe to open/close the sidebar drawer on mobile.
@@ -13,73 +13,73 @@ export function useSwipeDrawer(
   isOpen: boolean,
   setOpen: (open: boolean) => void,
 ) {
-  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   // Stable close callback that doesn't re-trigger history management
-  const closeDrawer = useCallback(() => setOpen(false), [setOpen])
+  const closeDrawer = useCallback(() => setOpen(false), [setOpen]);
 
   // Push/pop history entry when drawer opens/closes
   useEffect(() => {
-    if (window.innerWidth >= MD_BREAKPOINT) return
+    if (window.innerWidth >= MD_BREAKPOINT) return;
 
     if (isOpen) {
       // Only push if we haven't already
       if (!history.state?.[DRAWER_STATE_KEY]) {
-        history.pushState({ [DRAWER_STATE_KEY]: true }, '')
+        history.pushState({ [DRAWER_STATE_KEY]: true }, "");
       }
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   // Listen for popstate to close drawer on back navigation
   useEffect(() => {
     const onPopState = () => {
       if (isOpen) {
-        closeDrawer()
+        closeDrawer();
       }
-    }
+    };
 
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
-  }, [isOpen, closeDrawer])
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isOpen, closeDrawer]);
 
   // Swipe gestures
   useEffect(() => {
     const onTouchStart = (e: TouchEvent) => {
-      if (window.innerWidth >= MD_BREAKPOINT) return
-      const touch = e.touches[0]
-      touchStart.current = { x: touch.clientX, y: touch.clientY }
-    }
+      if (window.innerWidth >= MD_BREAKPOINT) return;
+      const touch = e.touches[0];
+      touchStart.current = { x: touch.clientX, y: touch.clientY };
+    };
 
     const onTouchEnd = (e: TouchEvent) => {
-      if (!touchStart.current) return
-      if (window.innerWidth >= MD_BREAKPOINT) return
+      if (!touchStart.current) return;
+      if (window.innerWidth >= MD_BREAKPOINT) return;
 
-      const touch = e.changedTouches[0]
-      const dx = touch.clientX - touchStart.current.x
-      const dy = touch.clientY - touchStart.current.y
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - touchStart.current.x;
+      const dy = touch.clientY - touchStart.current.y;
 
       // Require horizontal swipe (dx significant, not mostly vertical)
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) {
-        touchStart.current = null
-        return
+        touchStart.current = null;
+        return;
       }
 
       if (!isOpen && dx > 0) {
         // Right swipe anywhere → open
-        setOpen(true)
+        setOpen(true);
       } else if (isOpen && dx < 0) {
         // Left swipe while open → go back (which triggers popstate → close)
-        history.back()
+        history.back();
       }
 
-      touchStart.current = null
-    }
+      touchStart.current = null;
+    };
 
-    document.addEventListener('touchstart', onTouchStart, { passive: true })
-    document.addEventListener('touchend', onTouchEnd, { passive: true })
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
-      document.removeEventListener('touchstart', onTouchStart)
-      document.removeEventListener('touchend', onTouchEnd)
-    }
-  }, [isOpen, setOpen])
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isOpen, setOpen]);
 }

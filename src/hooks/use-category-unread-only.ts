@@ -1,10 +1,14 @@
-import { createLocalStorageHook } from './create-local-storage-hook'
+import { createLocalStorageHook } from "./create-local-storage-hook";
 
-export type CategoryUnreadOnly = 'on' | 'off'
+export type CategoryUnreadOnly = "on" | "off";
 
-const useHook = createLocalStorageHook<CategoryUnreadOnly>('category-unread-only', 'off', ['on', 'off'])
+const useHook = createLocalStorageHook<CategoryUnreadOnly>(
+  "category-unread-only",
+  "off",
+  ["on", "off"],
+);
 
 export function useCategoryUnreadOnly() {
-  const [categoryUnreadOnly, setCategoryUnreadOnly] = useHook()
-  return { categoryUnreadOnly, setCategoryUnreadOnly }
+  const [categoryUnreadOnly, setCategoryUnreadOnly] = useHook();
+  return { categoryUnreadOnly, setCategoryUnreadOnly };
 }
