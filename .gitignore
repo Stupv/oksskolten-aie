@@ -13,3 +13,6 @@ coverage/
 .claude/settings.local.json
 .claude/worktrees/
 .claude/rules/.*.md
+
+# AIE state (auto-generated)
+.aie/
